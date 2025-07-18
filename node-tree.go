@@ -1,5 +1,6 @@
 package GoHtml
 
+
 type Node struct {
 	NextNode     *Node
 	PreviousNode *Node
@@ -9,7 +10,8 @@ type Node struct {
 	TagName    string
 	Attributes map[string]string
 	Closed     bool
-	text       string
+	Text       string
+	//RWMutex
 }
 
 func (node *Node) AppendChild(childNode *Node) {
@@ -44,8 +46,36 @@ func (node *Node) GetParent() *Node {
 	return traverser.CurrentNode.parentNode
 }
 
-//AppendText
-//GetInnerText
-//Content
-//LastNode
-//FirstNode
+func (node *Node) GetLastNode() *Node{
+	traverser := GetTraverser(node)
+	for traverser.CurrentNode.NextNode != nil {
+		traverser.Next()
+	}
+	return traverser.CurrentNode
+}
+
+func (node *Node) GetFirstNode() *Node{
+	traverser := GetTraverser(node)
+	for traverser.CurrentNode.PreviousNode != nil{
+		traverser.Previous()
+	}
+	return traverser.CurrentNode
+}
+
+func (node *Node) AppendText(text string){
+	textNode := CreateNode("")
+	textNode.Text = text
+
+	node.GetLastNode().NextNode = textNode
+}
+
+func (node *Node) GetInnerText() string{
+	text := ""
+	traverser := GetTraverser(node.ChildNode)
+	for traverser.CurrentNode != nil{
+		text += traverser.CurrentNode.Text
+		traverser.Next()
+	}
+
+	return text
+}
