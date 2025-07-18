@@ -1,5 +1,8 @@
 package GoHtml
 
+import (
+	"sync"
+)
 
 type Node struct {
 	NextNode     *Node
@@ -9,11 +12,13 @@ type Node struct {
 
 	TagName    string
 	Attributes map[string]string
+	AttributesMutex sync.Mutex
 	Closed     bool
 	Text       string
-	//RWMutex
+	RWMutex sync.Mutex
 }
 
+//The AppendChild() method of the Node adds a node to the end of the list of children of a specified parent node.
 func (node *Node) AppendChild(childNode *Node) {
 	if node.ChildNode == nil {
 		node.ChildNode = childNode
@@ -29,6 +34,7 @@ func (node *Node) AppendChild(childNode *Node) {
 	childNode.PreviousNode = traverser.CurrentNode
 }
 
+//Append inserts the newNode to end of the node chain.
 func (node *Node) Append(newNode *Node) {
 	traverser := GetTraverser(node)
 	for traverser.CurrentNode.NextNode != nil {
@@ -38,6 +44,7 @@ func (node *Node) Append(newNode *Node) {
 	traverser.CurrentNode.NextNode = newNode
 }
 
+//GetParent returns a pointer to the parent node.
 func (node *Node) GetParent() *Node {
 	traverser := GetTraverser(node)
 	for traverser.CurrentNode.parentNode == nil && traverser.CurrentNode.PreviousNode != nil {
@@ -46,6 +53,7 @@ func (node *Node) GetParent() *Node {
 	return traverser.CurrentNode.parentNode
 }
 
+//GetLastNode returns the last node in the node chain.
 func (node *Node) GetLastNode() *Node{
 	traverser := GetTraverser(node)
 	for traverser.CurrentNode.NextNode != nil {
@@ -54,6 +62,7 @@ func (node *Node) GetLastNode() *Node{
 	return traverser.CurrentNode
 }
 
+//GetFirstNode returns the first node of the node chain.
 func (node *Node) GetFirstNode() *Node{
 	traverser := GetTraverser(node)
 	for traverser.CurrentNode.PreviousNode != nil{
@@ -62,6 +71,7 @@ func (node *Node) GetFirstNode() *Node{
 	return traverser.CurrentNode
 }
 
+//AppendText add text to the node
 func (node *Node) AppendText(text string){
 	textNode := CreateNode("")
 	textNode.Text = text
@@ -69,6 +79,7 @@ func (node *Node) AppendText(text string){
 	node.GetLastNode().NextNode = textNode
 }
 
+//GetInnerText returns all of the text in the node excluding child nodes text.
 func (node *Node) GetInnerText() string{
 	text := ""
 	traverser := GetTraverser(node.ChildNode)
