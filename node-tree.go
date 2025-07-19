@@ -194,6 +194,7 @@ func (node *Node) AppendText(text string){
 }
 
 //GetInnerText returns all of the text in the node excluding child nodes text.
+//Note: not finished
 func (node *Node) GetInnerText() string{
 	text := ""
 	traverser := GetTraverser(node.childNode)

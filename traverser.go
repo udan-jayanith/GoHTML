@@ -1,6 +1,8 @@
 package GoHtml
 
-import "sync"
+import (
+	"sync"
+)
 
 type Traverser struct{
 	currentNode *Node
