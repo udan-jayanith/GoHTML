@@ -8,24 +8,22 @@ import (
 //CreateNode returns a initialized new node.
 func CreateNode(tagName string) *Node {
 	return &Node{
-		TagName: strings.ToLower(strings.TrimSpace(tagName)),
-		RWMutex: sync.Mutex{},
-		AttributesMutex: sync.Mutex{},
-		Closed:  true,
+		tagName: strings.ToLower(strings.TrimSpace(tagName)),
+		rwMutex: sync.Mutex{},
+		closed:  true,
 	}
 }
 
 //CloneNode clones the node.
 func CloneNode(node *Node) *Node{
 	newNode := Node{
-		ChildNode: node.ChildNode,
-		TagName: node.TagName,
-		Attributes: node.Attributes,
-		Text: node.Text,
-		Closed: true,
+		childNode: node.GetChildNode(),
+		tagName: node.GetTagName(),
+		attributes: node.GetAttributes(),
+		text: node.GetText(),
+		closed: true,
 
-		RWMutex: sync.Mutex{},
-		AttributesMutex: sync.Mutex{},
+		rwMutex: sync.Mutex{},
 	}
 
 	return &newNode

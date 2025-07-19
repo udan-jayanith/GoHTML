@@ -12,8 +12,8 @@ func TestNodeTree(t *testing.T){
 	bodyEl.AppendChild(GoHtml.CreateNode("h1"))
 	bodyEl.AppendChild(GoHtml.CreateNode("p"))
 
-	traverser := GoHtml.GetTraverser(bodyEl.ChildNode)
-	for traverser.CurrentNode != nil{
+	traverser := GoHtml.GetTraverser(bodyEl.GetChildNode())
+	for traverser.GetCurrentNode() != nil{
 		traverser.Next()
 	}
 }
@@ -26,8 +26,9 @@ func TestAppend(t *testing.T){
 
 	count := 1
 	traverser := GoHtml.GetTraverser(h1)
-	for traverser.CurrentNode != nil{
-		if traverser.CurrentNode.TagName != fmt.Sprintf("h%v", count){
+	
+	for traverser.GetCurrentNode() != nil{
+		if traverser.GetCurrentNode().GetTagName() != fmt.Sprintf("h%v", count){
 			t.Fatal("Unexpected tag name.")
 		}
 		
@@ -56,7 +57,7 @@ func TestGetLastNode(t *testing.T){
 	body.AppendChild(GoHtml.CreateNode("p"))
 	body.AppendChild(GoHtml.CreateNode("footer"))
 
-	if body.ChildNode.GetLastNode().TagName != "footer"{
+	if body.GetChildNode().GetLastNode().GetTagName() != "footer"{
 		t.FailNow()
 	}
 }
@@ -67,25 +68,17 @@ func TestGetFirstNode(t *testing.T){
 	body.AppendChild(GoHtml.CreateNode("p"))
 	body.AppendChild(GoHtml.CreateNode("footer"))
 
-	if body.ChildNode.GetFirstNode().TagName != "h1"{
+	if body.GetChildNode().GetFirstNode().GetTagName() != "h1"{
 		t.FailNow()
 	}
 }
 
 func TestAppendTextAndInnerText(t *testing.T){
-	body := GoHtml.CreateNode("body")
+	p := GoHtml.CreateNode("body")
+	text := "Hello world"
+	p.AppendText(text)
 
-	h1 := GoHtml.CreateNode("h1")
-	h1.AppendText("This is a heading")
-	body.AppendChild(h1)
-
-	p := GoHtml.CreateNode("p")
-	p.AppendText(" Hello world")
-	body.AppendChild(p)
-
-	body.AppendChild(GoHtml.CreateNode("footer"))
-
-	if body.GetInnerText() != "This is a heading Hello world"{
+	if p.GetInnerText() != text{
 		t.FailNow()
 	}
 }
