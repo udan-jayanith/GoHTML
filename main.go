@@ -21,7 +21,7 @@ func DeepCloneNode(node *Node) *Node{
 		tagName: node.GetTagName(),
 		attributes: node.GetAttributes(),
 		text: node.GetText(),
-		closed: true,
+		closed: node.isClosed(),
 
 		rwMutex: sync.Mutex{},
 	}
