@@ -140,12 +140,9 @@ func (node *Node) AppendChild(childNode *Node) {
 		return
 	}
 
-	traverser := GetTraverser(node.GetChildNode())
-	for traverser.GetCurrentNode().GetNextNode() != nil {
-		traverser.Next()
-	}
-	traverser.GetCurrentNode().SetNextNode(childNode)
-	childNode.SetPreviousNode(traverser.GetCurrentNode())
+	lastNode := node.GetLastNode()
+	lastNode.SetNextNode(childNode)
+	childNode.SetPreviousNode(lastNode)
 }
 
 //Append inserts the newNode to end of the node chain.
