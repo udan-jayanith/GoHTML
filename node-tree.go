@@ -17,6 +17,7 @@ type Node struct {
 	rwMutex sync.Mutex
 }
 
+//GetNextNode returns node next to the node.
 func (node *Node) GetNextNode() *Node{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -24,6 +25,7 @@ func (node *Node) GetNextNode() *Node{
 	return node.nextNode
 }
 
+//SetNextNode make nodes next node as nextNode.
 func (node *Node) SetNextNode(nextNode *Node){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -31,6 +33,7 @@ func (node *Node) SetNextNode(nextNode *Node){
 	node.nextNode = nextNode
 }
 
+//GetPreviousNode returns the previous node.
 func (node *Node) GetPreviousNode() *Node{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -38,6 +41,7 @@ func (node *Node) GetPreviousNode() *Node{
 	return node.previousNode
 }
 
+//SetPreviousNode sets nodes previous node to previousNode.
 func (node *Node) SetPreviousNode(previousNode *Node){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -45,6 +49,7 @@ func (node *Node) SetPreviousNode(previousNode *Node){
 	node.previousNode = previousNode
 }
 
+//GetChildNode returns nodes first child node.
 func (node *Node) GetChildNode() *Node{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -52,6 +57,7 @@ func (node *Node) GetChildNode() *Node{
 	return node.childNode
 }
 
+//getParentNode returns parent node.
 func (node *Node) getParentNode() *Node{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -66,6 +72,7 @@ func (node *Node) setParentNode(parentNode *Node){
 	node.parentNode = parentNode
 }
 
+//GetTagName returns html tag name in all lowercase.
 func (node *Node) GetTagName() string{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -73,6 +80,7 @@ func (node *Node) GetTagName() string{
 	return node.tagName
 }
 
+//SetTagName changes the html tag name to the tagName.
 func (node *Node) SetTagName(tagName string){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -80,6 +88,7 @@ func (node *Node) SetTagName(tagName string){
 	node.tagName = tagName
 }
 
+//GetAttribute returns the specified attribute form the node.
 func (node *Node) GetAttribute(attributeName string) string{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -87,6 +96,7 @@ func (node *Node) GetAttribute(attributeName string) string{
 	return node.attributes[attributeName]
 }
 
+//GetAttributes returns all the attributes in the node.
 func (node *Node) GetAttributes() map[string]string{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -94,6 +104,7 @@ func (node *Node) GetAttributes() map[string]string{
 	return node.attributes
 }
 
+//SetAttribute add a attribute to the node.
 func (node *Node) SetAttribute(attribute, value string){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -101,6 +112,7 @@ func (node *Node) SetAttribute(attribute, value string){
 	node.attributes[attribute] = value
 }
 
+//GetText returns text in the node.
 func (node *Node) GetText() string{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -108,6 +120,7 @@ func (node *Node) GetText() string{
 	return node.text
 }
 
+//SetText add text to the node.
 func (node *Node) SetText(text string){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -157,7 +170,7 @@ func (node *Node) GetParent() *Node {
 	return node.GetFirstNode().getParentNode()
 }
 
-//GetLastNode returns the last node in the node chain.
+//GetLastNode returns the last node in the node branch.
 func (node *Node) GetLastNode() *Node{
 	traverser := GetTraverser(node)
 	for traverser.GetCurrentNode().GetNextNode() != nil {
@@ -166,7 +179,7 @@ func (node *Node) GetLastNode() *Node{
 	return traverser.GetCurrentNode()
 }
 
-//GetFirstNode returns the first node of the node chain.
+//GetFirstNode returns the first node of the node branch.
 func (node *Node) GetFirstNode() *Node{
 	traverser := GetTraverser(node)
 	for traverser.GetCurrentNode().GetPreviousNode() != nil{
@@ -175,7 +188,7 @@ func (node *Node) GetFirstNode() *Node{
 	return traverser.GetCurrentNode()
 }
 
-//AppendText add text to the node
+//AppendText add text to the node.
 func (node *Node) AppendText(text string){
 	textNode := CreateNode("")
 	textNode.SetText(text)
@@ -183,8 +196,7 @@ func (node *Node) AppendText(text string){
 	node.GetLastNode().AppendChild(textNode)
 }
 
-//GetInnerText returns all of the text in the node excluding child nodes text.
-//Note: not finished
+//GetInnerText returns all of the text inside the node.
 func (node *Node) GetInnerText() string{
 	text := ""
 	traverser := GetTraverser(node.childNode)

@@ -17,6 +17,7 @@ func GetTraverser(startingNode *Node) Traverser {
 	}
 }
 
+//GetCurrentNode returns the current node.
 func (t *Traverser) GetCurrentNode() *Node {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
@@ -24,6 +25,7 @@ func (t *Traverser) GetCurrentNode() *Node {
 	return t.currentNode
 }
 
+//SetCurrentNodeTo changes the current node to the newNode.
 func (t *Traverser) SetCurrentNodeTo(newNode *Node) {
 	t.rwMutex.Lock()
 	defer t.rwMutex.Unlock()
@@ -46,6 +48,7 @@ func (t *Traverser) Previous() *Node {
 }
 
 //TODO: use a linked stack
+//Walkthrough traverse the node tree from the current node to the end of the node tree. Traverse happens using the depth-first-search and call callback at every node.
 func (t *Traverser) Walkthrough(callback func(node *Node)) {
 	stack := []*Node{t.GetCurrentNode()}
 
