@@ -140,28 +140,21 @@ func (node *Node) AppendChild(childNode *Node) {
 		return
 	}
 
-	lastNode := node.GetLastNode()
+	lastNode := node.GetChildNode().GetLastNode()
 	lastNode.SetNextNode(childNode)
 	childNode.SetPreviousNode(lastNode)
 }
 
 //Append inserts the newNode to end of the node chain.
 func (node *Node) Append(newNode *Node) {
-	traverser := GetTraverser(node)
-	for traverser.GetCurrentNode().GetNextNode() != nil {
-		traverser.Next()
-	}
-	newNode.SetPreviousNode(traverser.GetCurrentNode())
-	traverser.GetCurrentNode().SetNextNode(newNode)
+	lastNode := node.GetLastNode()
+	newNode.SetPreviousNode(lastNode)
+	lastNode.SetNextNode(newNode)
 }
 
 //GetParent returns a pointer to the parent node.
 func (node *Node) GetParent() *Node {
-	traverser := GetTraverser(node)
-	for traverser.GetCurrentNode().getParentNode() == nil && traverser.GetCurrentNode().GetPreviousNode() != nil {
-		traverser.Previous()
-	}
-	return traverser.GetCurrentNode().getParentNode()
+	return node.GetFirstNode().getParentNode()
 }
 
 //GetLastNode returns the last node in the node chain.
@@ -195,10 +188,12 @@ func (node *Node) AppendText(text string){
 func (node *Node) GetInnerText() string{
 	text := ""
 	traverser := GetTraverser(node.childNode)
-	for traverser.GetCurrentNode() != nil{
-		text += traverser.GetCurrentNode().GetText()
-		traverser.Next()
-	}
+	traverser.Walkthrough(func(node *Node) {
+		if node.GetTagName() != "" {
+			return
+		}
+		text += node.GetText()
+	})
 
 	return text
 }

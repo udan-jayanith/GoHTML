@@ -47,7 +47,7 @@ func TestGetParent(t *testing.T){
 	article.AppendChild(hr)
 
 	if hr.GetParent() != article || p.GetParent() != article{
-		t.Fatal("Unexpected parent node")
+		t.Fatal("Unexpected parent node", hr.GetParent())
 	}
 }
 
@@ -74,11 +74,16 @@ func TestGetFirstNode(t *testing.T){
 }
 
 func TestAppendTextAndInnerText(t *testing.T){
-	p := GoHtml.CreateNode("body")
-	text := "Hello world"
-	p.AppendText(text)
+	body := GoHtml.CreateNode("body")
+	h1 := GoHtml.CreateNode("h1")
+	h1.AppendText("This is a heading")
+	body.AppendChild(h1)
+	p := GoHtml.CreateNode("p")
+	p.AppendText("The HTML <p>tag is a fundamental element used for creating paragraphs in web development. It helps structure content, separating text into distinct blocks. When you wrap text within <p>... </p>tags, you tell browsers to treat the enclosed content as a paragraph.")
+	body.AppendChild(p)
 
-	if p.GetInnerText() != text{
-		t.FailNow()
+	if body.GetInnerText() != h1.GetChildNode().GetText() + p.GetChildNode().GetText(){
+		t.Fatal(body.GetInnerText(), " != ", h1.GetChildNode().GetText() + p.GetChildNode().GetText())
 	}
+
 }
