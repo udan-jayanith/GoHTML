@@ -6,6 +6,8 @@ import (
 	"io"
 	"regexp"
 	"strings"
+
+	"github.com/emirpasic/gods/stacks/linkedliststack"
 )
 
 /*
@@ -82,7 +84,34 @@ func wrapAttributeValue(value string) string {
 }
 
 func WriteHTML(w io.Writer, node *Node) {
-	traverser := GetTraverser(node)
+	rootNode := CreateNode(".")
+	rootNode.Append(CreateNode("."))
+	rootNode.AppendChild(node)
 
-	
+	stack := linkedliststack.New()
+	traverser := GetTraverser(rootNode)
+
+	traverser.Walkthrough(func(node *Node) {
+		if node.GetTagName() == "" && node.GetNextNode() == nil{
+			w.Write([]byte(node.GetText()))
+			value, _ := stack.Pop()
+			fmt.Fprintf(w, "</%s>", value.(string))
+		} else if node.GetTagName() == "" {
+			w.Write([]byte(node.GetText()))
+		} else if node.GetChildNode() == nil && node.GetNextNode() == nil {
+			fmt.Fprintf(w, "<%s></%s>", node.GetTagName(), node.GetTagName())
+			value, _ := stack.Pop()
+			fmt.Fprintf(w, "</%s>", value.(string))
+			return
+		} else if node.GetChildNode() == nil {
+			fmt.Fprintf(w, "<%s></%s>", node.GetTagName(), node.GetTagName())
+			return
+		}else if node.GetChildNode() != nil {
+			stack.Push(node.GetTagName())
+			if node.GetTagName() != "."{
+				fmt.Fprintf(w, "<%s>", node.GetTagName())
+			}
+		}
+	})
+
 }
