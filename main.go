@@ -10,18 +10,20 @@ func CreateNode(tagName string) *Node {
 	return &Node{
 		tagName: strings.ToLower(strings.TrimSpace(tagName)),
 		rwMutex: sync.Mutex{},
-		closed:  true,
 	}
 }
 
 //DeepCloneNode clones the node without having references to it's original parent node, previous node and next node.
 func DeepCloneNode(node *Node) *Node{
+	node.rwMutex.Lock()
+	attributes := node.attributes
+	node.rwMutex.Unlock()
+
 	newNode := Node{
 		childNode: node.GetChildNode(),
 		tagName: node.GetTagName(),
-		attributes: node.GetAttributes(),
+		attributes: attributes,
 		text: node.GetText(),
-		closed: node.isClosed(),
 
 		rwMutex: sync.Mutex{},
 	}

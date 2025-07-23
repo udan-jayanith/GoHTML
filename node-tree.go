@@ -12,7 +12,6 @@ type Node struct {
 
 	tagName    string
 	attributes map[string]string
-	closed     bool
 	text       string
 	rwMutex sync.Mutex
 }
@@ -96,12 +95,14 @@ func (node *Node) GetAttribute(attributeName string) string{
 	return node.attributes[attributeName]
 }
 
-//GetAttributes returns all the attributes in the node.
-func (node *Node) GetAttributes() map[string]string{
+//IterateAttributes calls callback at every attribute in the node.
+func (node *Node) IterateAttributes(callback func(attribute, value string)){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
-	return node.attributes
+	for k, v := range node.attributes{
+		callback(k, v)
+	}
 }
 
 //SetAttribute add a attribute to the node.
@@ -126,20 +127,6 @@ func (node *Node) SetText(text string){
 	defer node.rwMutex.Unlock()
 
 	node.text = text
-}
-
-func (node *Node) isClosed() bool{
-	node.rwMutex.Lock()
-	defer node.rwMutex.Unlock()
-
-	return node.closed
-}
-
-func (node *Node) setClosedTo(closed bool){
-	node.rwMutex.Lock()
-	defer node.rwMutex.Unlock()
-
-	node.closed = closed
 }
 
 //The AppendChild() method of the Node adds a node to the end of the list of children of a specified parent node.

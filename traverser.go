@@ -2,6 +2,7 @@ package GoHtml
 
 import (
 	"sync"
+	"github.com/emirpasic/gods/stacks/linkedliststack"
 )
 
 type Traverser struct {
@@ -50,19 +51,18 @@ func (t *Traverser) Previous() *Node {
 //TODO: use a linked stack
 //Walkthrough traverse the node tree from the current node to the end of the node tree. Traverse happens using the depth-first-search and call callback at every node.
 func (t *Traverser) Walkthrough(callback func(node *Node)) {
-	stack := []*Node{t.GetCurrentNode()}
+	stack := linkedliststack.New()
+	stack.Push(t.GetCurrentNode())
 
-	for len(stack) > 0{
-		currentNode := stack[len(stack)-1]
-		callback(currentNode)
-
-		stack = stack[:len(stack)-1]
+	for stack.Size() > 0{
+		currentNode, _ := stack.Pop()
+		callback(currentNode.(*Node))
 		
-		if currentNode.GetNextNode() != nil{
-			stack = append(stack, currentNode.GetNextNode())
+		if currentNode.(*Node).GetNextNode() != nil{
+			stack.Push(currentNode.(*Node).GetNextNode())
 		} 
-		if currentNode.GetChildNode() != nil{
-			stack = append(stack, currentNode.GetChildNode())
+		if currentNode.(*Node).GetChildNode() != nil{
+			stack.Push(currentNode.(*Node).GetChildNode())
 		}
 	}
 }

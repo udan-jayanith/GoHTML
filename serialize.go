@@ -1,12 +1,14 @@
 package GoHtml
 
 import (
-	"bufio"
+	//"bufio"
+	"fmt"
 	"io"
 	"regexp"
 	"strings"
 )
 
+/*
 func Decode(rd io.Reader){
 	reader := bufio.NewReader(rd)
 	var currentNode *Node
@@ -66,9 +68,21 @@ func IsQuote(chr string) bool {
 }
 
 func getFirstUnclosedTagInNodeChain(lastNode *Node) *Node{
-	traverser := GetTraverser(lastNode)
-	for traverser.GetCurrentNode() != nil && traverser.GetCurrentNode().isClosed(){
-		traverser.Previous()
+}
+
+*/
+
+func wrapAttributeValue(value string) string {
+	reg := regexp.MustCompile(`^[\d\.]+$`)
+	if reg.Match([]byte(value)) {
+		return value
 	}
-	return traverser.GetCurrentNode()
+
+	return `"` + strings.ReplaceAll(value, `"`, "&quot;") + `"`
+}
+
+func WriteHTML(w io.Writer, node *Node) {
+	traverser := GetTraverser(node)
+
+	
 }
