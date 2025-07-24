@@ -6,6 +6,8 @@ import (
 	"io"
 	"regexp"
 	"strings"
+
+	"github.com/emirpasic/gods/stacks/linkedliststack"
 )
 
 /*
@@ -81,24 +83,52 @@ func wrapAttributeValue(value string) string {
 	return `"` + strings.ReplaceAll(value, `"`, "&quot;") + `"`
 }
 
-type visitedNode struct {
-	childNodes bool
-	nextNodes  bool
+func decodeListAttributes(node *Node) string {
+	w := strings.Builder{}
+	node.IterateAttributes(func(attribute, value string) {
+		w.Write([]byte(fmt.Sprintf(" %s=%s", attribute, wrapAttributeValue(value))))
+	})
+	return w.String()
 }
 
 func WriteHTML(w io.Writer, rootNode *Node) {
-	traverser := GetTraverser(rootNode)
-	for traverser.GetCurrentNode() != nil {
-		if traverser.GetCurrentNode().GetTagName() == "" {
-			w.Write([]byte(traverser.GetCurrentNode().GetText()))
-		} else {
-			fmt.Fprintf(w, "<%s>", traverser.GetCurrentNode().GetTagName())
-			if traverser.GetCurrentNode().GetChildNode() != nil {
-				WriteHTML(w, traverser.GetCurrentNode().GetChildNode())
-			}
-			fmt.Fprintf(w, "</%s>", traverser.GetCurrentNode().GetTagName())
+	type stackFrame struct {
+		node      *Node
+		openedTag bool
+	}
+
+	stack := linkedliststack.New()
+	stack.Push(stackFrame{node: rootNode, openedTag: false})
+
+	for stack.Size() > 0 {
+		t, _ := stack.Pop()
+		top := t.(stackFrame)
+		current := top.node
+
+		if current == nil {
+			continue
 		}
 
-		traverser.Next()
+		tagName := current.GetTagName()
+		if tagName == "" {
+			w.Write([]byte(current.GetText()))
+		} else if IsVoidTag(tagName) {
+			fmt.Fprintf(w, "<%s %s>", tagName, decodeListAttributes(current))
+			if current.GetNextNode() != nil {
+				stack.Push(stackFrame{node: current.GetNextNode(), openedTag: false})
+			}
+		} else if !top.openedTag {
+			fmt.Fprintf(w, "<%s %s>", tagName, decodeListAttributes(current))
+			stack.Push(stackFrame{node: current, openedTag: true})
+
+			if current.GetChildNode() != nil {
+				stack.Push(stackFrame{node: current.GetChildNode(), openedTag: false})
+			}
+		} else {
+			fmt.Fprintf(w, "</%s>", tagName)
+			if current.GetNextNode() != nil {
+				stack.Push(stackFrame{node: current.GetNextNode(), openedTag: false})
+			}
+		}
 	}
 }

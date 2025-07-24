@@ -10,6 +10,7 @@ func CreateNode(tagName string) *Node {
 	return &Node{
 		tagName: strings.ToLower(strings.TrimSpace(tagName)),
 		rwMutex: sync.Mutex{},
+		attributes: make(map[string]string),
 	}
 }
 
