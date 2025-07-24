@@ -49,7 +49,7 @@ func (t *Traverser) Previous() *Node {
 }
 
 //TODO: use a linked stack
-//Walkthrough traverse the node tree from the current node to the end of the node tree. Traverse happens using the depth-first-search and call callback at every node.
+//Walkthrough traverse the node tree from the current node to the end of the node tree by visiting every node. 
 func (t *Traverser) Walkthrough(callback func(node *Node)) {
 	stack := linkedliststack.New()
 	stack.Push(t.GetCurrentNode())
