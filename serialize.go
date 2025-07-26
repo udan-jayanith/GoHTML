@@ -1,7 +1,7 @@
 package GoHtml
 
 import (
-	//"bufio"
+	"bufio"
 	"fmt"
 	"io"
 	"regexp"
@@ -10,88 +10,76 @@ import (
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 )
 
-/*
-func Decode(rd io.Reader){
-	reader := bufio.NewReader(rd)
-	var currentNode *Node
-
-	strBuf := ""
-	quote := ""
-	for {
-		byt, err := reader.ReadByte()
-		if err != nil{
-			break
-		}
-
-		strBuf += string(byt)
-
-		if IsQuote(string(byt)) && quote == "" && !regexp.MustCompile(`^\s*<.+$`).MatchString(strBuf) {
-			quote = string(byt)
-		}else if IsQuote(string(byt)) && quote == string(byt){
-			quote = ""
-		}
-
-		if quote != ""{
-			continue
-		}
+var (
+	SyntaxError error = fmt.Errorf("Syntax error")
+)
 
 
-		htmlTagRegex := regexp.MustCompile(`^\s*<.+>$`)
-		htmlTextRegex := regexp.MustCompile(`<$`)
 
-		if htmlTagRegex.MatchString(strBuf) {
-			strBuf = ""
-		}else if htmlTextRegex.MatchString(strBuf) && len(strings.TrimSpace(strBuf)) > 1{
-			strBuf = strBuf[:len(strBuf)-1]
-			if currentNode == nil{
-				currentNode = CreateNode("")
-				currentNode.SetText(strBuf)
-			}else{
-				currentNode.AppendText(strBuf)
+func serializeHTMLTag(tag string) (*Node, error) {
+	tag = strings.TrimRight(strings.TrimLeft(tag, "<"), ">")
+	reg := regexp.MustCompile(`(\w+(?:-\w+)*)\s*(?:=\s*(?:(["'`+"`"+`])(.*?)2|(\S+)))?`).FindAllString(tag, len(tag))
+	if reg == nil {
+		return CreateNode(""), fmt.Errorf("Invalid html tag")
+	}
+
+	node := CreateNode(reg[0])
+	if len(reg) <= 1 {
+		return node, nil
+	}
+	reg = reg[1:]
+	for _, v := range reg {
+		if regexp.MustCompile(`^\s*.+\s*=\s*\d+\s*$`).MatchString(v) {
+			s := regexp.MustCompile(`^\s*(.+)\s*=\s*(\d+)\s*$`).FindAllStringSubmatch(v, 2)
+			node.SetAttribute(s[0][1], s[0][2])
+		} else if regexp.MustCompile(`\w+\s*(=)\s*.+`).Match([]byte(v)) {
+			s := regexp.MustCompile(`^\s*(.+)\s*=\s*['"](.+)['"]\s*$`).FindAllStringSubmatch(v, 2)
+			if len(s) < 1 {
+				continue
 			}
-
-			strBuf = "<"
+			node.SetAttribute(s[0][1], s[0][2])
+		} else {
+			node.SetAttribute(strings.TrimSpace(v), "true")
 		}
 	}
+	return node, nil
 }
 
-func SerializeHTML(tag string){
-	//This is the regex that will be used to parse the tag
-	//(\w+(?:-\w+)*)\s*(?:=\s*(?:(["'`+"`"+`])(.*?)\2|(\S+)))?
+func isReadingTag(strBuf string) bool {
+	return regexp.MustCompile(`^<.*`).MatchString(strBuf)
 }
 
-func IsClosingTag(tag string) bool {
+func isClosingTag(tag string) bool {
 	reg := regexp.MustCompile(`^<\/.*>\s*$`)
 	return reg.MatchString(tag)
 }
 
-func IsQuote(chr string) bool {
+func isQuote(chr string) bool {
 	return chr == `"` || chr == `'` || chr == "`"
 }
 
-func getFirstUnclosedTagInNodeChain(lastNode *Node) *Node{
+func isDigit(value string) bool {
+	reg := regexp.MustCompile(`^[\d\.]+$`)
+	return reg.Match([]byte(value))
 }
 
-*/
-
 func wrapAttributeValue(value string) string {
-	reg := regexp.MustCompile(`^[\d\.]+$`)
-	if reg.Match([]byte(value)) {
+	if isDigit(value) {
 		return value
 	}
 
 	return `"` + strings.ReplaceAll(value, `"`, "&quot;") + `"`
 }
 
-func decodeListAttributes(node *Node) string {
+func encodeListAttributes(node *Node) string {
 	w := strings.Builder{}
 	node.IterateAttributes(func(attribute, value string) {
-		w.Write([]byte(fmt.Sprintf(" %s=%s", attribute, wrapAttributeValue(value))))
+		w.Write(fmt.Appendf(nil, " %s=%s", attribute, wrapAttributeValue(value)))
 	})
 	return w.String()
 }
 
-func WriteHTML(w io.Writer, rootNode *Node) {
+func EncodeToHTML(w io.Writer, rootNode *Node) {
 	type stackFrame struct {
 		node      *Node
 		openedTag bool
@@ -113,12 +101,12 @@ func WriteHTML(w io.Writer, rootNode *Node) {
 		if tagName == "" {
 			w.Write([]byte(current.GetText()))
 		} else if IsVoidTag(tagName) {
-			fmt.Fprintf(w, "<%s %s>", tagName, decodeListAttributes(current))
+			fmt.Fprintf(w, "<%s %s>", tagName, encodeListAttributes(current))
 			if current.GetNextNode() != nil {
 				stack.Push(stackFrame{node: current.GetNextNode(), openedTag: false})
 			}
 		} else if !top.openedTag {
-			fmt.Fprintf(w, "<%s %s>", tagName, decodeListAttributes(current))
+			fmt.Fprintf(w, "<%s %s>", tagName, encodeListAttributes(current))
 			stack.Push(stackFrame{node: current, openedTag: true})
 
 			if current.GetChildNode() != nil {

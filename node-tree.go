@@ -180,6 +180,10 @@ func (node *Node) AppendText(text string){
 	textNode := CreateNode("")
 	textNode.SetText(text)
 
+	if node.GetTagName() == "" || IsVoidTag(node.GetTagName()){
+		node.GetLastNode().Append(textNode)
+		return
+	}
 	node.GetLastNode().AppendChild(textNode)
 }
 

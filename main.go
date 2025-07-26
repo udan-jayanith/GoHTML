@@ -14,6 +14,12 @@ func CreateNode(tagName string) *Node {
 	}
 }
 
+func CreateTextNode(text string) *Node{
+	textNode := CreateNode("")
+	textNode.SetText(text)
+	return textNode
+}
+
 //DeepCloneNode clones the node without having references to it's original parent node, previous node and next node.
 func DeepCloneNode(node *Node) *Node{
 	node.rwMutex.Lock()
