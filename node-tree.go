@@ -200,3 +200,21 @@ func (node *Node) GetInnerText() string{
 
 	return text
 }
+
+func (node *Node) RemoveNode(){
+	node.rwMutex.Lock()
+	defer node.rwMutex.Unlock()
+	
+	previousNode := node.previousNode
+	nextNode := node.nextNode
+
+	node.previousNode = nil
+	node.nextNode = nil
+
+	if previousNode != nil {
+		previousNode.SetNextNode(nextNode)
+	}
+	if nextNode != nil {
+		nextNode.SetPreviousNode(previousNode)
+	}
+}

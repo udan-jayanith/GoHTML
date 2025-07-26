@@ -14,7 +14,7 @@ var (
 	SyntaxError error = fmt.Errorf("Syntax error")
 )
 
-func DecodeToNodeTree(rd io.Reader) (*Node, error) {
+func Decode(rd io.Reader) (*Node, error) {
 	newRd := bufio.NewReader(rd)
 	rootNode := CreateNode("")
 	currentNode := rootNode
@@ -25,7 +25,9 @@ func DecodeToNodeTree(rd io.Reader) (*Node, error) {
 	for {
 		byt, err := newRd.ReadByte()
 		if err != nil {
-			return rootNode, nil
+			node := rootNode.GetNextNode()
+			rootNode.RemoveNode()
+			return node, nil
 		}
 		str += string(byt)
 
@@ -52,7 +54,9 @@ func DecodeToNodeTree(rd io.Reader) (*Node, error) {
 			//opening and void tags
 			node, err := serializeHTMLTag(str)
 			if err != nil {
-				return rootNode, err
+				node := rootNode.GetNextNode()
+				rootNode.RemoveNode()
+				return node, err
 			}
 			str = ""
 
@@ -183,7 +187,7 @@ func encodeListAttributes(node *Node) string {
 	return w.String()
 }
 
-func EncodeToHTML(w io.Writer, rootNode *Node) {
+func Encode(w io.Writer, rootNode *Node) {
 	type stackFrame struct {
 		node      *Node
 		openedTag bool
