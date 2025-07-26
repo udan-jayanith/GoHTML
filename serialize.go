@@ -14,6 +14,7 @@ var (
 	SyntaxError error = fmt.Errorf("Syntax error")
 )
 
+//Decode reads from rd and create a node-tree. Then returns the root node and an error. If error were to occur it would be SyntaxError.
 func Decode(rd io.Reader) (*Node, error) {
 	newRd := bufio.NewReader(rd)
 	rootNode := CreateNode("")
@@ -109,7 +110,6 @@ func getFirstOpenNode(currentNode *Node, stack *linkedliststack.Stack) (*Node, e
 	return traverser.GetCurrentNode(), SyntaxError
 }
 
-// isOpen returns true by peeking the stack.
 func isOpen(currentNode *Node, stack *linkedliststack.Stack) bool {
 	if stack.Size() < 1 || isSelfClosingNode(currentNode) {
 		return false
@@ -187,6 +187,7 @@ func encodeListAttributes(node *Node) string {
 	return w.String()
 }
 
+//Encode writes to w encoding of rootNode
 func Encode(w io.Writer, rootNode *Node) {
 	type stackFrame struct {
 		node      *Node
