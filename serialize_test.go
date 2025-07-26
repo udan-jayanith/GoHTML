@@ -4,10 +4,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/udan-jayanith/GoHTML"
+	GoHtml "github.com/udan-jayanith/GoHTML"
 )
 
-func TestEncodeToHTML(t *testing.T){
+func TestEncodeToHTML(t *testing.T) {
 	filePath := "./test-files/outputs/test-writeHTML.html"
 	os.Remove(filePath)
 	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0644)
@@ -29,3 +29,25 @@ func TestEncodeToHTML(t *testing.T){
 	GoHtml.EncodeToHTML(file, body)
 }
 
+func TestDecodeToNodeTree(t *testing.T) {
+	file, err := os.Open("./test-files/1.html")
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	node, err := GoHtml.DecodeToNodeTree(file)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	filePath := "./test-files/outputs/TestDecodeToNodeTree.html"
+	os.Remove(filePath)
+	file, err = os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	GoHtml.EncodeToHTML(file, node.GetNextNode())
+}

@@ -14,13 +14,82 @@ var (
 	SyntaxError error = fmt.Errorf("Syntax error")
 )
 
+// Given the stack and the currentNode check wether the current node is closed or open. If current node is closed append the node as a next node otherwise append the node as a child node.
+// If the tag is a closing tag close the first unclosed tag and add that tag to the stack. Pop nodes from the stack until first unclosed tag and set current node as that closed node.
+// if the s is a closing tag get the first unclosed tag and add it to the stack.
+func DecodeToNodeTree(rd io.Reader) (*Node, error) {
+	newRd := bufio.NewReader(rd)
+	rootNode := CreateNode("")
+	currentNode := rootNode
+	stack := linkedliststack.New()
+	markAsClosed(currentNode, stack)
 
+	str := ""
+	readingQuote := ""
+	for {
+		byt, err := newRd.ReadByte()
+		if err != nil {
+			return rootNode, nil
+		}
+		str += string(byt)
+
+		if isQuote(string(byt)) && (currentNode.GetTagName() == "script" || currentNode.GetTagName() == "style" || isReadingTag(str)) &&
+			readingQuote == "" {
+			readingQuote = string(byt)
+			continue
+		} else if readingQuote == string(byt) {
+			readingQuote = ""
+		}
+
+		if readingQuote != "" {
+			continue
+		}
+
+		if regexp.MustCompile(`^\s*<\/.*>\s*$`).MatchString(str) {
+			//closing tag
+
+			markAsClosed(currentNode, stack)
+			node, err := getFirstUnclosedNode(currentNode, stack)
+			if err != nil {
+				return rootNode, err
+			}
+			currentNode = node
+			str = ""
+		} else if regexp.MustCompile(`^\s*<.*>\s*$`).MatchString(str) {
+			//opening tag
+			node, err := serializeHTMLTag(str)
+			if err != nil {
+				return rootNode, err
+			}
+			str = ""
+
+			if isClosed(currentNode, stack) {
+				currentNode.Append(node)
+			} else {
+				currentNode.AppendChild(node)
+			}
+			currentNode = node
+		} else if string(byt) == "<" && !regexp.MustCompile(`^\s*<$`).MatchString(str) {
+			// text
+			str = str[:len(str)-1]
+			node := serializeTextNode(str)
+			str = "<"
+
+			if isClosed(currentNode, stack) {
+				currentNode.Append(node)
+			} else {
+				currentNode.AppendChild(node)
+			}
+			currentNode = node
+		}
+	}
+}
 
 func serializeHTMLTag(tag string) (*Node, error) {
 	tag = strings.TrimRight(strings.TrimLeft(tag, "<"), ">")
-	reg := regexp.MustCompile(`(\w+(?:-\w+)*)\s*(?:=\s*(?:(["'`+"`"+`])(.*?)2|(\S+)))?`).FindAllString(tag, len(tag))
+	reg := regexp.MustCompile(`([\w!]+(?:-\w+)*)\s*(?:=\s*(?:(["'`+"`"+`])(.*?)2|(\S+)))?`).FindAllString(tag, len(tag))
 	if reg == nil {
-		return CreateNode(""), fmt.Errorf("Invalid html tag")
+		return CreateNode(""), SyntaxError
 	}
 
 	node := CreateNode(reg[0])
@@ -45,13 +114,57 @@ func serializeHTMLTag(tag string) (*Node, error) {
 	return node, nil
 }
 
+func serializeTextNode(s string) *Node {
+	node := CreateTextNode(s)
+	return node
+}
+
+func getFirstUnclosedNode(currentNode *Node, stack *linkedliststack.Stack) (*Node, error) {
+	traverser := GetTraverser(currentNode)
+	for traverser.GetCurrentNode() != nil {
+		if !isClosed(traverser.GetCurrentNode(), stack) {
+			return traverser.GetCurrentNode(), nil
+		}
+		
+		// if node is a text node or a void node doesn't have to pop from the stack
+		if traverser.GetCurrentNode().GetTagName() != "" && !IsVoidTag(traverser.GetCurrentNode().GetTagName()){
+			_, ok := stack.Pop()
+			if !ok {
+				return traverser.GetCurrentNode(), SyntaxError
+			}
+		}
+
+		if traverser.GetCurrentNode().GetPreviousNode() == nil {
+			traverser.SetCurrentNodeTo(traverser.GetCurrentNode().GetParent())
+		} else {
+			traverser.Previous()
+		}
+	}
+
+	return traverser.GetCurrentNode(), SyntaxError
+}
+
 func isReadingTag(strBuf string) bool {
 	return regexp.MustCompile(`^<.*`).MatchString(strBuf)
 }
 
-func isClosingTag(tag string) bool {
-	reg := regexp.MustCompile(`^<\/.*>\s*$`)
-	return reg.MatchString(tag)
+func isClosed(currentNode *Node, stack *linkedliststack.Stack) bool {
+	if currentNode.GetTagName() == "" || IsVoidTag(currentNode.GetTagName()) {
+		return true
+	}else if stack.Size() < 1 {
+		return false
+	}
+
+	m, _ := stack.Peek()
+	node := m.(*Node)
+	return currentNode == node
+}
+
+func markAsClosed(currentNode *Node, stack *linkedliststack.Stack) {
+	if currentNode.GetTagName() == "" || IsVoidTag(currentNode.GetTagName()) {
+		return
+	}
+	stack.Push(currentNode)
 }
 
 func isQuote(chr string) bool {

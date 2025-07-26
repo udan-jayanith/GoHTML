@@ -141,8 +141,8 @@ func (node *Node) AppendChild(childNode *Node) {
 	}
 
 	lastNode := node.GetChildNode().GetLastNode()
-	lastNode.SetNextNode(childNode)
 	childNode.SetPreviousNode(lastNode)
+	lastNode.SetNextNode(childNode)
 }
 
 //Append inserts the newNode to end of the node chain.
