@@ -1,3 +1,7 @@
+/*
+A powerful and comprehensive HTML parser and DOM manipulation library for Go, 
+bringing JavaScript-like DOM operations to the Go ecosystem.
+*/
 package GoHtml
 
 import (
@@ -14,6 +18,7 @@ func CreateNode(tagName string) *Node {
 	}
 }
 
+//CreateTextNode returns a new node that represents the given text.
 func CreateTextNode(text string) *Node{
 	textNode := CreateNode("")
 	textNode.SetText(text)

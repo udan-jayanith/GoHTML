@@ -4,6 +4,9 @@ import (
 	"sync"
 )
 
+
+//The DOM Node struct is an abstract base class upon which many other DOM API objects are based, thus letting 
+// those object types to be used similarly and often interchangeably.
 type Node struct {
 	nextNode     *Node
 	previousNode *Node
@@ -48,7 +51,7 @@ func (node *Node) SetPreviousNode(previousNode *Node){
 	node.previousNode = previousNode
 }
 
-//GetChildNode returns nodes first child node.
+//GetChildNode returns the first child elements of this node.
 func (node *Node) GetChildNode() *Node{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -71,7 +74,7 @@ func (node *Node) setParentNode(parentNode *Node){
 	node.parentNode = parentNode
 }
 
-//GetTagName returns html tag name in all lowercase.
+//Returns a string with the name of the tag for the given node.
 func (node *Node) GetTagName() string{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -95,7 +98,7 @@ func (node *Node) GetAttribute(attributeName string) string{
 	return node.attributes[attributeName]
 }
 
-//IterateAttributes calls callback at every attribute in the node.
+//IterateAttributes calls callback at every attribute in the node by passing attribute and value of the each node to the callback.
 func (node *Node) IterateAttributes(callback func(attribute, value string)){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -113,7 +116,7 @@ func (node *Node) SetAttribute(attribute, value string){
 	node.attributes[attribute] = value
 }
 
-//GetText returns text in the node.
+//GetText returns text on the node. This does not returns text on it's child nodes. If you also wants child nodes text use GetInnerText method on the node.
 func (node *Node) GetText() string{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
@@ -201,10 +204,11 @@ func (node *Node) GetInnerText() string{
 	return text
 }
 
+//RemoveNode removes the node from the branch safely. 
 func (node *Node) RemoveNode(){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
-	
+
 	previousNode := node.previousNode
 	nextNode := node.nextNode
 
