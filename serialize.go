@@ -229,3 +229,17 @@ func Encode(w io.Writer, rootNode *Node) {
 		}
 	}
 }
+
+//NodeTreeToHTML returns encoding of node-tree as a string.
+func NodeTreeToHTML(rootNode *Node) string{
+	builder := &strings.Builder{}
+	Encode(builder, rootNode)
+	return builder.String()
+}
+
+//HTMLToNodeTree return html code as a node-tree. If error were to occur it would be SyntaxError.
+func HTMLToNodeTree(html string) (*Node, error){
+	rd := strings.NewReader(html) 
+	node, err := Decode(rd)
+	return node, err
+}
