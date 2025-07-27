@@ -48,15 +48,23 @@ func (t *Traverser) Previous() *Node {
 	return t.GetCurrentNode()
 }
 
+type TraverseCondition bool
+const (
+	StopWalkthrough TraverseCondition = true
+	ContinueWalkthrough TraverseCondition = false
+)
+
 //TODO: use a linked stack
 //Walkthrough traverse the node tree from the current node to the end of the node tree by visiting every node. 
-func (t *Traverser) Walkthrough(callback func(node *Node)) {
+func (t *Traverser) Walkthrough(callback func(node *Node) TraverseCondition) {
 	stack := linkedliststack.New()
 	stack.Push(t.GetCurrentNode())
 
 	for stack.Size() > 0{
 		currentNode, _ := stack.Pop()
-		callback(currentNode.(*Node))
+		if callback(currentNode.(*Node)) == StopWalkthrough {
+			return
+		}
 		
 		if currentNode.(*Node).GetNextNode() != nil{
 			stack.Push(currentNode.(*Node).GetNextNode())

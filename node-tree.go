@@ -4,8 +4,7 @@ import (
 	"sync"
 )
 
-
-//The DOM Node struct is an abstract base class upon which many other DOM API objects are based, thus letting 
+//The DOM Node struct is an abstract base class upon which many other DOM API objects are based, thus letting
 // those object types to be used similarly and often interchangeably.
 type Node struct {
 	nextNode     *Node
@@ -194,11 +193,12 @@ func (node *Node) AppendText(text string){
 func (node *Node) GetInnerText() string{
 	text := ""
 	traverser := GetTraverser(node.childNode)
-	traverser.Walkthrough(func(node *Node) {
+	traverser.Walkthrough(func(node *Node) TraverseCondition {
 		if node.GetTagName() != "" {
-			return
+			return ContinueWalkthrough
 		}
 		text += node.GetText()
+		return ContinueWalkthrough
 	})
 
 	return text
@@ -246,7 +246,6 @@ QuerySelectorAll takes two regexps and returns all nodes that matches the regexp
 Closest returns the closest node that matches the className. 
 *Closest
 */
-
 /*
 *GetElementById
 *GetElementByClass
