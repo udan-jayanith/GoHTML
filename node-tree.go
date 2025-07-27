@@ -222,3 +222,32 @@ func (node *Node) RemoveNode(){
 		nextNode.SetPreviousNode(previousNode)
 	}
 }
+
+//Features to add
+/*
+AddClass add the given class name to the node.
+*AddClass
+
+RemoveClass removes the specified class name from the node.
+*RemoveClass
+
+HasClass returns a boolean value specifying whether the node has the specified class name or not.
+*HasClass
+
+GetClassList returns a map of class names in the specified node.
+*GetClassList
+
+QuerySelector takes two regexps and returns the first node that matches the regexps in attribute and value in order.  
+*QuerySelector
+
+QuerySelectorAll takes two regexps and returns all nodes that matches the regexps in attribute and value in order.
+*QuerySelectorAll
+
+Closest returns the closest node that matches the className. 
+*Closest
+*/
+
+/*
+*GetElementById
+*GetElementByClass
+*/
