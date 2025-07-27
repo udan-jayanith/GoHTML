@@ -55,7 +55,7 @@ const (
 )
 
 //TODO: use a linked stack
-//Walkthrough traverse the node tree from the current node to the end of the node tree by visiting every node. 
+//Walkthrough traverse the node tree from the current node to the end of the node tree by visiting every node. If callback returned StopWalkthrough walkthrough function will stop else if it returned ContinueWalkthrough it continues walkthrough until every node is visited.
 func (t *Traverser) Walkthrough(callback func(node *Node) TraverseCondition) {
 	stack := linkedliststack.New()
 	stack.Push(t.GetCurrentNode())
