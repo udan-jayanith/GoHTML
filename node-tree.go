@@ -246,6 +246,8 @@ QuerySelectorAll takes two regexps and returns all nodes that matches the regexp
 Closest returns the closest node that matches the className. 
 *Closest
 */
+
+//Features to design.
 /*
 *GetElementById
 *GetElementByClass
