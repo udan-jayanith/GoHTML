@@ -8,8 +8,9 @@ import (
 	"strings"
 )
 
+//Void tags
 const (
-	Area          = "area"
+	Area   string = "area"
 	Base   string = "base"
 	Br     string = "br"
 	Col    string = "col"
@@ -26,33 +27,33 @@ const (
 )
 
 var (
-	VoidTags = map[string]bool{
-		"area":   true,
-		"base":   true,
-		"br":     true,
-		"col":    true,
-		"embed":  true,
-		"hr":     true,
-		"img":    true,
-		"input":  true,
-		"link":   true,
-		"meta":   true,
-		"param":  true,
-		"source": true,
-		"track":  true,
-		"wbr":    true,
+	voidTags = map[string]bool{
+		"area":     true,
+		"base":     true,
+		"br":       true,
+		"col":      true,
+		"embed":    true,
+		"hr":       true,
+		"img":      true,
+		"input":    true,
+		"link":     true,
+		"meta":     true,
+		"param":    true,
+		"source":   true,
+		"track":    true,
+		"wbr":      true,
 		"!doctype": true,
 	}
 )
 
-//IsVoidTag returns whether the tagName is a void tag or DTD 
-func IsVoidTag(tagName string) bool{
+// IsVoidTag returns whether the tagName is a void tag or DTD
+func IsVoidTag(tagName string) bool {
 	tagName = strings.TrimSpace(strings.ToLower(tagName))
-	return VoidTags[tagName]
+	return voidTags[tagName]
 }
 
 /*
- A DTD defines the structure and the legal elements and attributes of an XML document.
+A DTD defines the structure and the legal elements and attributes of an XML document.
 */
 const (
 	//This is not a void el. but added it anyway.
