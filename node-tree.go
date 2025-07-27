@@ -223,6 +223,10 @@ func (node *Node) RemoveNode(){
 	}
 }
 
+func (node *Node) IsTextNode() bool {
+	return node.GetTagName() == ""
+}
+
 //Features to add
 /*
 AddClass add the given class name to the node.
