@@ -1,9 +1,11 @@
-## Stage 1
-- bug fix: Comments get parsed if html, css and js.
-- minor-change: html="true" fix.
-- feature add: RemoveAttribute
+## v0.0.1-beta.1
+- bug fix: style attribute not get serialized correctly.
 
-## Stage 2
+## v0.0.1
+DecodeHeader only serializes only up to head. And return a node with only head and it's child nodes.
+* DecodeHeader
+
+## v0.0.2
 QuerySelector takes attribute name and regexp for the value and returns the first node that matches the regexp.  
 * QuerySelector
 
@@ -13,7 +15,7 @@ QuerySelectorAll takes two regexps and returns all nodes that matches the regexp
 Closest returns the closest node that matches the className. 
 * Closest
 
-## Stage 3
+## v0.0.3
 AddClass add the given class name to the node.
 * AddClass
 
@@ -26,7 +28,7 @@ HasClass returns a boolean value specifying whether the node has the specified c
 GetClassList returns a map of class names in the specified node.
 * GetClassList
 
-## Stage 4
+## v0.0.4
 * GetElementById
 * GetElementByClassName
 * GetElementByTagName
