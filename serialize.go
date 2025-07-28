@@ -14,7 +14,7 @@ var (
 	SyntaxError error = fmt.Errorf("Syntax error")
 )
 
-//Decode reads from rd and create a node-tree. Then returns the root node and an error. If error were to occur it would be SyntaxError.
+// Decode reads from rd and create a node-tree. Then returns the root node and an error. If error were to occur it would be SyntaxError.
 func Decode(rd io.Reader) (*Node, error) {
 	newRd := bufio.NewReader(rd)
 	rootNode := CreateNode("")
@@ -23,6 +23,7 @@ func Decode(rd io.Reader) (*Node, error) {
 
 	str := ""
 	readingQuote := ""
+	readingComment := ""
 	for {
 		byt, err := newRd.ReadByte()
 		if err != nil {
@@ -31,6 +32,18 @@ func Decode(rd io.Reader) (*Node, error) {
 			return node, nil
 		}
 		str += string(byt)
+
+		last4Char := getLast4Char(str)
+		if readingComment == "" && isStartingComment(currentNode, last4Char) {
+			readingComment = getStartingComment(currentNode, last4Char)
+		} else if readingComment != "" && isEndingComment(currentNode, readingComment, last4Char) {
+			readingComment = ""
+			str = ""
+		}
+
+		if readingComment != "" {
+			continue
+		}
 
 		if isQuote(string(byt)) && (currentNode.GetTagName() == "script" || currentNode.GetTagName() == "style" || isReadingTag(str)) &&
 			readingQuote == "" {
@@ -67,7 +80,7 @@ func Decode(rd io.Reader) (*Node, error) {
 				currentNode.Append(node)
 			}
 			currentNode = node
-			if !isSelfClosingNode(node){
+			if !isSelfClosingNode(node) {
 				stack.Push(currentNode)
 			}
 		} else if string(byt) == "<" && !regexp.MustCompile(`^\s*<$`).MatchString(str) {
@@ -84,6 +97,43 @@ func Decode(rd io.Reader) (*Node, error) {
 			currentNode = node
 		}
 	}
+}
+
+func isStartingComment(currentNode *Node, last4Char string) bool {
+	if currentNode.GetTagName() == "script" {
+		return regexp.MustCompile(`//$`).MatchString(last4Char) || regexp.MustCompile(`/\*$`).MatchString(last4Char)
+	} else if currentNode.GetTagName() == "style" {
+		return regexp.MustCompile(`/\*$`).MatchString(last4Char)
+	}
+
+	return regexp.MustCompile(`<!--$`).MatchString(last4Char)
+}
+
+func getStartingComment(currentNode *Node, last4Char string) string {
+	if currentNode.GetTagName() == "script" {
+		if regexp.MustCompile(`//$`).MatchString(last4Char) {
+			return "//"
+		}
+		return regexp.MustCompile(`/\*$`).FindString(last4Char)
+	} else if currentNode.GetTagName() == "style" {
+		return regexp.MustCompile(`/\*$`).FindString(last4Char)
+	}
+
+	return regexp.MustCompile(`<!--$`).FindString(last4Char)
+}
+
+func isEndingComment(currentNode *Node, startingComment string, last4Char string) bool {
+	if currentNode.GetTagName() == "script" {
+		return (regexp.MustCompile(`\n$`).MatchString(last4Char) && startingComment == "//") || (regexp.MustCompile(`\*/$`).MatchString(last4Char) && startingComment == "/*")
+	} else if currentNode.GetTagName() == "style" {
+		return regexp.MustCompile(`\*/$`).MatchString(last4Char) && startingComment == "/*"
+	}
+
+	return regexp.MustCompile(`-->$`).MatchString(last4Char) && startingComment == "<!--"
+}
+
+func getLast4Char(str string) string {
+	return regexp.MustCompile(`.{0,4}$`).FindString(str)
 }
 
 func getFirstOpenNode(currentNode *Node, stack *linkedliststack.Stack) (*Node, error) {
@@ -147,7 +197,7 @@ func serializeHTMLTag(tag string) (*Node, error) {
 			}
 			node.SetAttribute(s[0][1], s[0][2])
 		} else {
-			node.SetAttribute(strings.TrimSpace(v), "true")
+			node.SetAttribute(strings.TrimSpace(v), "")
 		}
 	}
 	return node, nil
@@ -182,12 +232,16 @@ func wrapAttributeValue(value string) string {
 func encodeListAttributes(node *Node) string {
 	w := strings.Builder{}
 	node.IterateAttributes(func(attribute, value string) {
-		w.Write(fmt.Appendf(nil, " %s=%s", attribute, wrapAttributeValue(value)))
+		if strings.TrimSpace(value) == "" {
+			w.Write(fmt.Appendf(nil, " %s", attribute))
+		} else {
+			w.Write(fmt.Appendf(nil, " %s=%s", attribute, wrapAttributeValue(value)))
+		}
 	})
 	return w.String()
 }
 
-//Encode writes to w encoding of rootNode
+// Encode writes to w encoding of rootNode
 func Encode(w io.Writer, rootNode *Node) {
 	type stackFrame struct {
 		node      *Node
@@ -230,16 +284,16 @@ func Encode(w io.Writer, rootNode *Node) {
 	}
 }
 
-//NodeTreeToHTML returns encoding of node-tree as a string.
-func NodeTreeToHTML(rootNode *Node) string{
+// NodeTreeToHTML returns encoding of node-tree as a string.
+func NodeTreeToHTML(rootNode *Node) string {
 	builder := &strings.Builder{}
 	Encode(builder, rootNode)
 	return builder.String()
 }
 
-//HTMLToNodeTree return html code as a node-tree. If error were to occur it would be SyntaxError.
-func HTMLToNodeTree(html string) (*Node, error){
-	rd := strings.NewReader(html) 
+// HTMLToNodeTree return html code as a node-tree. If error were to occur it would be SyntaxError.
+func HTMLToNodeTree(html string) (*Node, error) {
+	rd := strings.NewReader(html)
 	node, err := Decode(rd)
 	return node, err
 }

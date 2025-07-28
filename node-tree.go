@@ -97,6 +97,14 @@ func (node *Node) GetAttribute(attributeName string) string{
 	return node.attributes[attributeName]
 }
 
+//RemoveAttribute remove or delete the specified attribute.
+func (node *Node) RemoveAttribute(attributeName string){
+	node.rwMutex.Lock()
+	defer node.rwMutex.Unlock()
+
+	delete(node.attributes, attributeName)
+}
+
 //IterateAttributes calls callback at every attribute in the node by passing attribute and value of the each node to the callback.
 func (node *Node) IterateAttributes(callback func(attribute, value string)){
 	node.rwMutex.Lock()
