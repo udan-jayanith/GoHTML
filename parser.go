@@ -10,10 +10,6 @@ import (
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 )
 
-var (
-	SyntaxError error = fmt.Errorf("Syntax error")
-)
-
 // Decode reads from rd and create a node-tree. Then returns the root node and an error. If error were to occur it would be SyntaxError.
 func Decode(rd io.Reader) (*Node, error) {
 	newRd := bufio.NewReader(rd)
@@ -66,6 +62,7 @@ func Decode(rd io.Reader) (*Node, error) {
 			}
 		} else if regexp.MustCompile(`^\s*<.*>\s*$`).MatchString(str) {
 			//opening and void tags
+			fmt.Println(str)
 			node, err := serializeHTMLTag(str)
 			if err != nil {
 				node := rootNode.GetNextNode()
@@ -210,85 +207,6 @@ func serializeTextNode(s string) *Node {
 
 func isReadingTag(strBuf string) bool {
 	return regexp.MustCompile(`^<.*`).MatchString(strBuf)
-}
-
-func isQuote(chr string) bool {
-	return chr == `"` || chr == `'` || chr == "`"
-}
-
-func isDigit(value string) bool {
-	reg := regexp.MustCompile(`^[\d\.]+$`)
-	return reg.Match([]byte(value))
-}
-
-func wrapAttributeValue(value string) string {
-	if isDigit(value) {
-		return value
-	}
-
-	return `"` + strings.ReplaceAll(value, `"`, "&quot;") + `"`
-}
-
-func encodeListAttributes(node *Node) string {
-	w := strings.Builder{}
-	node.IterateAttributes(func(attribute, value string) {
-		if strings.TrimSpace(value) == "" {
-			w.Write(fmt.Appendf(nil, " %s", attribute))
-		} else {
-			w.Write(fmt.Appendf(nil, " %s=%s", attribute, wrapAttributeValue(value)))
-		}
-	})
-	return w.String()
-}
-
-// Encode writes to w encoding of rootNode
-func Encode(w io.Writer, rootNode *Node) {
-	type stackFrame struct {
-		node      *Node
-		openedTag bool
-	}
-
-	stack := linkedliststack.New()
-	stack.Push(stackFrame{node: rootNode, openedTag: false})
-
-	for stack.Size() > 0 {
-		t, _ := stack.Pop()
-		top := t.(stackFrame)
-		current := top.node
-
-		if current == nil {
-			continue
-		}
-
-		tagName := current.GetTagName()
-		if tagName == "" {
-			w.Write([]byte(current.GetText()))
-		} else if IsVoidTag(tagName) {
-			fmt.Fprintf(w, "<%s %s>", tagName, encodeListAttributes(current))
-			if current.GetNextNode() != nil {
-				stack.Push(stackFrame{node: current.GetNextNode(), openedTag: false})
-			}
-		} else if !top.openedTag {
-			fmt.Fprintf(w, "<%s %s>", tagName, encodeListAttributes(current))
-			stack.Push(stackFrame{node: current, openedTag: true})
-
-			if current.GetChildNode() != nil {
-				stack.Push(stackFrame{node: current.GetChildNode(), openedTag: false})
-			}
-		} else {
-			fmt.Fprintf(w, "</%s>", tagName)
-			if current.GetNextNode() != nil {
-				stack.Push(stackFrame{node: current.GetNextNode(), openedTag: false})
-			}
-		}
-	}
-}
-
-// NodeTreeToHTML returns encoding of node-tree as a string.
-func NodeTreeToHTML(rootNode *Node) string {
-	builder := &strings.Builder{}
-	Encode(builder, rootNode)
-	return builder.String()
 }
 
 // HTMLToNodeTree return html code as a node-tree. If error were to occur it would be SyntaxError.

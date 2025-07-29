@@ -1,6 +1,6 @@
 ## v0.0.0-beta.3
 - bug fix: style attribute not get serialized correctly.
-
+- regexp compilation optimizations.
 ## v0.0.0
 DecodeHeader only serializes only up to head. And return a node with only head and it's child nodes.
 * DecodeHeader
