@@ -2,7 +2,6 @@ package GoHtml
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"regexp"
 	"strings"
@@ -30,7 +29,7 @@ func Decode(rd io.Reader) (*Node, error) {
 		str += string(byt)
 
 		last4Char := getLast4Char(str)
-		if readingComment == "" && isStartingComment(currentNode, last4Char) {
+		if readingComment == "" && isStartingComment(currentNode, last4Char) && readingQuote == "" {
 			readingComment = getStartingComment(currentNode, last4Char)
 		} else if readingComment != "" && isEndingComment(currentNode, readingComment, last4Char) {
 			readingComment = ""
@@ -62,7 +61,6 @@ func Decode(rd io.Reader) (*Node, error) {
 			}
 		} else if regexp.MustCompile(`^\s*<.*>\s*$`).MatchString(str) {
 			//opening and void tags
-			fmt.Println(str)
 			node, err := serializeHTMLTag(str)
 			if err != nil {
 				node := rootNode.GetNextNode()
@@ -172,32 +170,97 @@ func isSelfClosingNode(node *Node) bool {
 }
 
 func serializeHTMLTag(tag string) (*Node, error) {
+	tag = strings.TrimSpace(tag)
 	tag = strings.TrimRight(strings.TrimLeft(tag, "<"), ">")
-	reg := regexp.MustCompile(`([\w!]+(?:-\w+)*)\s*(?:=\s*(?:(["'`+"`"+`])(.*?)2|(\S+)))?`).FindAllString(tag, len(tag))
-	if reg == nil {
-		return CreateNode(""), SyntaxError
-	}
+	node := CreateNode("")
 
-	node := CreateNode(reg[0])
-	if len(reg) <= 1 {
+	//extract the html tag name
+	tagNameRegex := regexp.MustCompile(`^\s*([\w\-_!]*)`)
+	tagName := tagNameRegex.FindString(tag)
+	if tagName == "" {
+		return node, SyntaxError
+	}
+	node.SetTagName(strings.TrimSpace(tagName))
+
+	//Cut the tag name from tag.
+	afterTagName := regexp.MustCompile(`^\s*[\w\-_]*\s*(.*)`)
+	subMatch := afterTagName.FindStringSubmatch(tag)
+	if len(subMatch) > 1 {
+		if strings.TrimSpace(getLeftMostString(subMatch)) == "" {
+			return node, nil
+		}
+		tag = getLeftMostString(subMatch)
+	} else {
+		return node, SyntaxError
+	}
+	if tag == "" || getLeftMostString(afterTagName.FindStringSubmatch(tag)) == tagName{
 		return node, nil
 	}
-	reg = reg[1:]
-	for _, v := range reg {
-		if regexp.MustCompile(`^\s*.+\s*=\s*\d+\s*$`).MatchString(v) {
-			s := regexp.MustCompile(`^\s*(.+)\s*=\s*(\d+)\s*$`).FindAllStringSubmatch(v, 2)
-			node.SetAttribute(s[0][1], s[0][2])
-		} else if regexp.MustCompile(`\w+\s*(=)\s*.+`).Match([]byte(v)) {
-			s := regexp.MustCompile(`^\s*(.+)\s*=\s*['"](.+)['"]\s*$`).FindAllStringSubmatch(v, 2)
-			if len(s) < 1 {
-				continue
-			}
-			node.SetAttribute(s[0][1], s[0][2])
-		} else {
-			node.SetAttribute(strings.TrimSpace(v), "")
+
+	for {
+		if strings.TrimSpace(tag) == "" {
+			return node, nil
 		}
+
+		//This parses attribute name.
+		attributeNameReg := regexp.MustCompile(`^\s*([\w\-_]*)\s*`)
+		subMatch = attributeNameReg.FindStringSubmatch(tag)
+		attributeName := ""
+		if len(subMatch) > 0 {
+			attributeName = getLeftMostString(subMatch)
+		} else {
+			return node, SyntaxError
+		}
+
+		//This remove attribute name from the tag.
+		afterAttributeName := regexp.MustCompile(`^\s*[\w\-_!]*\s*(.*)`)
+		subMatch = afterAttributeName.FindStringSubmatch(tag)
+		if len(subMatch) >= 1 {
+			if strings.TrimSpace(getLeftMostString(subMatch)) == "" {
+				return node, nil
+			}
+			tag = getLeftMostString(subMatch)
+		} else {
+			return node, SyntaxError
+		}
+
+		isDefinedValueReg := regexp.MustCompile(`^\s*(=).*`)
+		if !isDefinedValueReg.MatchString(tag) {
+			node.SetAttribute(attributeName, "")
+			if attributeName == getLeftMostString(attributeNameReg.FindStringSubmatch(tag)){
+				return node, nil
+			}
+			continue
+		}
+
+		afterEqualSignReg := regexp.MustCompile(`^\s*=(.*)`)
+		subMatch = afterEqualSignReg.FindStringSubmatch(tag)
+		if len(subMatch) >= 1 {
+			tag = getLeftMostString(subMatch)
+		} else {
+			return node, SyntaxError
+		}
+
+		definedValueReg := regexp.MustCompile(`\s*(\s*('.*?'|(".*?")|[\d+\.?\d+]*).*).*`)
+		subMatch = definedValueReg.FindStringSubmatch(tag)
+		if len(subMatch) >= 1 {
+			node.SetAttribute(attributeName, escapeQuotes(getLeftMostString(subMatch)))
+		} else {
+			return node, SyntaxError
+		}
+
+		afterDefinedValueReg := regexp.MustCompile(`\s*('.*?'|(".*?")|[\d+\.?\d+]*)\s*(.*)`)
+		subMatch = afterDefinedValueReg.FindStringSubmatch(tag)
+		if len(subMatch) >= 1 {
+			if strings.TrimSpace(getLeftMostString(subMatch)) == "" || strings.TrimSpace(getLeftMostString(subMatch))  == tag{
+				return node, nil
+			}
+			tag = getLeftMostString(subMatch)
+		} else {
+			return node, SyntaxError
+		}
+
 	}
-	return node, nil
 }
 
 func serializeTextNode(s string) *Node {
@@ -214,4 +277,24 @@ func HTMLToNodeTree(html string) (*Node, error) {
 	rd := strings.NewReader(html)
 	node, err := Decode(rd)
 	return node, err
+}
+
+func escapeQuotes(str string) string {
+	escapeQuotesReg := regexp.MustCompile(`^\s*('(.*)'|"(.*)"|([\d+\.]*)|.*)\s*$`)
+	matches := escapeQuotesReg.FindStringSubmatch(str)
+	for i := len(matches) - 1; i >= 0; i-- {
+		if strings.TrimSpace(matches[i]) != "" {
+			return matches[i]
+		}
+	}
+	return ""
+}
+
+func getLeftMostString(slice []string) string {
+	for i := len(slice) - 1; i >= 0; i-- {
+		if strings.TrimSpace(slice[i]) != "" {
+			return slice[i]
+		}
+	}
+	return ""
 }

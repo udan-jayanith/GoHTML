@@ -23,5 +23,6 @@ func TestDecode(t *testing.T) {
 
 	builder1 := &strings.Builder{}
 	GoHtml.Encode(builder1, node)
+	t.Log(builder1.String())
 	//It's hard compare exacted output. Because strings, prettier formats html code. htmlFormatter and prettier add extra stuffs to the html codes like dash in void tags. Exacted output is in the ./test-files/2.html.
 }
