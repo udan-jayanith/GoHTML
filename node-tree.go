@@ -1,6 +1,7 @@
 package GoHtml
 
 import (
+	"strings"
 	"sync"
 )
 
@@ -86,7 +87,7 @@ func (node *Node) SetTagName(tagName string){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
-	node.tagName = tagName
+	node.tagName = strings.TrimSpace(tagName)
 }
 
 //GetAttribute returns the specified attribute form the node.
@@ -120,7 +121,7 @@ func (node *Node) SetAttribute(attribute, value string){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
-	node.attributes[attribute] = value
+	node.attributes[strings.TrimSpace(attribute)] = strings.TrimSpace(value)
 }
 
 //GetText returns text on the node. This does not returns text on it's child nodes. If you also wants child nodes text use GetInnerText method on the node.

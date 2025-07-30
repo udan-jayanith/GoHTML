@@ -51,12 +51,12 @@ func Encode(w io.Writer, rootNode *Node) {
 		if tagName == "" {
 			w.Write([]byte(current.GetText()))
 		} else if IsVoidTag(tagName) {
-			fmt.Fprintf(w, "<%s %s>", tagName, encodeListAttributes(current))
+			fmt.Fprintf(w, "<%s%s>", tagName, encodeListAttributes(current))
 			if current.GetNextNode() != nil {
 				stack.Push(stackFrame{node: current.GetNextNode(), openedTag: false})
 			}
 		} else if !top.openedTag {
-			fmt.Fprintf(w, "<%s %s>", tagName, encodeListAttributes(current))
+			fmt.Fprintf(w, "<%s%s>", tagName, encodeListAttributes(current))
 			stack.Push(stackFrame{node: current, openedTag: true})
 
 			if current.GetChildNode() != nil {
