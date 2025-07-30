@@ -1,56 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>All-In-One Example</title>
+	<head>
+		<meta charset="UTF-8" />
+		<title>All-In-One Example</title>
 
-  <!-- ✅ STYLE TAG with CSS COMMENTS -->
-  <style>
-    /* This styles the body */
-    body {
-      background-color: #f0f0f0;
-    }
+		<!-- ✅ STYLE TAG with CSS COMMENTS -->
+		<style>
+			/* This styles the body */
+			body {
+				background-color: #f0f0f0;
+			}
 
-    /* Style for paragraph */
-    p {
-      color: green;
-      font-size: 16px;
-    }
+			/* Style for paragraph */
+			p {
+				color: green;
+				font-size: 16px;
+			}
 
-    /* Void tags like img won't be styled here but here's a sample */
-    img {
-      border: 2px solid black;
-    }
-  </style>
-</head>
-<body style="margin: 40px; color: darkblue;"> <!-- ✅ INLINE STYLE -->
+			/* Void tags like img won't be styled here but here's a sample */
+			img {
+				border: 2px solid black;
+			}
+		</style>
+	</head>
+	<body style="margin: 40px; color: darkblue">
+		<!-- ✅ INLINE STYLE -->
 
-  <!-- ✅ H1 TAG -->
-  <h1 style="color: darkblue;">Welcome to the Demo Page</h1>
+		<!-- ✅ H1 TAG -->
+		<h1 style="color: darkblue">Welcome to the Demo Page</h1>
 
-  <!-- ✅ P TAG -->
-  <p>This paragraph shows off CSS and inline styling.</p>
+		<!-- ✅ P TAG -->
+		<p>This paragraph shows off CSS and inline styling.</p>
 
-  <!-- ✅ VOID TAGS -->
-  <br> <!-- Line break -->
-  <img src="https://via.placeholder.com/100" alt="Sample Image"> <!-- Self-closing -->
-  <hr> <!-- Horizontal rule -->
-  <input type="text" placeholder="Enter something...">
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="styles.css">
+		<!-- ✅ VOID TAGS -->
+		<br />
+		<!-- Line break -->
+		<img src="https://via.placeholder.com/100" alt="Sample Image" />
+		<!-- Self-closing -->
+		<hr />
+		<!-- Horizontal rule -->
+		<input type="text" placeholder="Enter something..." />
+		<meta charset="UTF-8" />
+		<link rel="stylesheet" href="styles.css" />
+		<video src="1.mp4" autoplay></video>
 
-  <!-- ✅ SCRIPT TAG with JS COMMENTS -->
-  <script>
-    // This is a single-line JavaScript comment
+		<h1 bold>Test</h1>
+		<p inner-text="hello world"></p>
+		<article></article>
 
-    /*
+		<article>
+			<h1 bold>Test</h1>
+			<p inner-text="hello world"></p>
+		</article>
+		<!-- ✅ SCRIPT TAG with JS COMMENTS -->
+		<script>
+			// This is a single-line JavaScript comment
+
+			/*
       This is a multi-line JavaScript comment.
       It’s useful for longer explanations or disabling blocks of code.
     */
 
-    console.log("Page loaded successfully!");
-    alert("JS is working!");
-  </script>
-
-</body>
+			console.log('Page loaded successfully!')
+      console.log(`		<article>
+			<h1 bold>Test</h1>
+			<p inner-text="hello world"></p>
+		</article>`)
+			alert('JS is working!')
+		</script>
+	</body>
 </html>

@@ -28,10 +28,9 @@ func Decode(rd io.Reader) (*Node, error) {
 		}
 		str += string(byt)
 
-		last4Char := getLast4Char(str)
-		if readingComment == "" && isStartingComment(currentNode, last4Char) && readingQuote == "" {
-			readingComment = getStartingComment(currentNode, last4Char)
-		} else if readingComment != "" && isEndingComment(currentNode, readingComment, last4Char) {
+		if readingComment == "" && isStartingComment(currentNode, str) && readingQuote == "" && currentNode.GetTagName() != "script"{
+			readingComment = getStartingComment(currentNode, str)
+		} else if readingComment != "" && isEndingComment(currentNode, readingComment, str) {
 			readingComment = ""
 			str = ""
 		}
@@ -61,6 +60,11 @@ func Decode(rd io.Reader) (*Node, error) {
 			}
 		} else if regexp.MustCompile(`^\s*<.*>\s*$`).MatchString(str) {
 			//opening and void tags
+			if isJsComment(str) && currentNode.GetTagName() == "script"{
+				str = ""
+				continue
+			}
+
 			node, err := serializeHTMLTag(str)
 			if err != nil {
 				node := rootNode.GetNextNode()
@@ -127,8 +131,9 @@ func isEndingComment(currentNode *Node, startingComment string, last4Char string
 	return regexp.MustCompile(`-->$`).MatchString(last4Char) && startingComment == "<!--"
 }
 
-func getLast4Char(str string) string {
-	return regexp.MustCompile(`.{0,4}$`).FindString(str)
+func isJsComment(str string) bool{
+	jsCommentReg := regexp.MustCompile(`^\s*<!--.*-->\s*$`)
+	return jsCommentReg.MatchString(str)
 }
 
 func getFirstOpenNode(currentNode *Node, stack *linkedliststack.Stack) (*Node, error) {
@@ -193,7 +198,7 @@ func serializeHTMLTag(tag string) (*Node, error) {
 	} else {
 		return node, SyntaxError
 	}
-	if tag == "" || getLeftMostString(afterTagName.FindStringSubmatch(tag)) == tagName{
+	if tag == "" || strings.TrimSpace(getLeftMostString(afterTagName.FindStringSubmatch(tag))) == strings.TrimSpace(tagName){
 		return node, nil
 	}
 
@@ -227,7 +232,7 @@ func serializeHTMLTag(tag string) (*Node, error) {
 		isDefinedValueReg := regexp.MustCompile(`^\s*(=).*`)
 		if !isDefinedValueReg.MatchString(tag) {
 			node.SetAttribute(attributeName, "")
-			if attributeName == getLeftMostString(attributeNameReg.FindStringSubmatch(tag)){
+			if strings.TrimSpace(attributeName) == strings.TrimSpace(getLeftMostString(attributeNameReg.FindStringSubmatch(tag))){
 				return node, nil
 			}
 			continue
@@ -252,7 +257,7 @@ func serializeHTMLTag(tag string) (*Node, error) {
 		afterDefinedValueReg := regexp.MustCompile(`\s*('.*?'|(".*?")|[\d+\.?\d+]*)\s*(.*)`)
 		subMatch = afterDefinedValueReg.FindStringSubmatch(tag)
 		if len(subMatch) >= 1 {
-			if strings.TrimSpace(getLeftMostString(subMatch)) == "" || strings.TrimSpace(getLeftMostString(subMatch))  == tag{
+			if strings.TrimSpace(getLeftMostString(subMatch)) == "" || strings.TrimSpace(getLeftMostString(subMatch))  == strings.TrimSpace(tag){
 				return node, nil
 			}
 			tag = getLeftMostString(subMatch)
