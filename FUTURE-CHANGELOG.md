@@ -1,11 +1,7 @@
 ## v0.0.0-beta.3
-- bug: html attribute parse rule violation.
-- regexp compilation optimizations.
-## v0.0.0
-DecodeHeader only serializes only up to head. And return a node with only head and it's child nodes.
-* DecodeHeader
+-bug: comments error in decoder.
 
-## v0.0.1
+## v0.0.0
 QuerySelector takes attribute name and regexp for the value and returns the first node that matches the regexp.  
 * QuerySelector
 
@@ -15,7 +11,7 @@ QuerySelectorAll takes two regexps and returns all nodes that matches the regexp
 Closest returns the closest node that matches the className. 
 * Closest
 
-## v0.0.2
+## v0.0.1
 AddClass add the given class name to the node.
 * AddClass
 
@@ -28,10 +24,16 @@ HasClass returns a boolean value specifying whether the node has the specified c
 GetClassList returns a map of class names in the specified node.
 * GetClassList
 
-## v0.0.3
+## v0.0.2
 * GetElementById
 * GetElementByClassName
 * GetElementByTagName
 * GetElementsById
 * GetElementsByClassName
 * GetElementsByTagName
+
+## v0.0.3
+DecodeHeader only serializes only up to head. And return a node with only head and it's child nodes.
+* DecodeOnly
+* DecodeOnlyByClassName
+* DecodeHeader

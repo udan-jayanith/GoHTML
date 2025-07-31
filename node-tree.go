@@ -87,7 +87,7 @@ func (node *Node) SetTagName(tagName string){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
-	node.tagName = strings.TrimSpace(tagName)
+	node.tagName = strings.TrimSpace(strings.ToLower(tagName))
 }
 
 //GetAttribute returns the specified attribute form the node.

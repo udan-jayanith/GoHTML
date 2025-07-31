@@ -9,7 +9,7 @@ import (
 )
 
 func TestDecode(t *testing.T) {
-	file, err := os.Open("./test-files/1.html")
+	file, err := os.Open("./test-files/2.html")
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -20,6 +20,17 @@ func TestDecode(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
+
+	/*
+	traverser := GoHtml.GetTraverser(node)
+	traverser.Walkthrough(func(node *GoHtml.Node) GoHtml.TraverseCondition {
+		if node.GetAttribute("inner-text") == "js"{
+			t.Fatal("js comment got parsed", node)
+			return GoHtml.StopWalkthrough
+		}
+		return GoHtml.ContinueWalkthrough
+	})
+	*/
 
 	builder1 := &strings.Builder{}
 	GoHtml.Encode(builder1, node)
