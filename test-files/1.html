@@ -21,6 +21,8 @@
 			img {
 				border: 2px solid black;
 			}
+
+			/*<test-block bold>This doesn't suppose to get parsed</test-block>*/
 		</style>
 	</head>
 	<body style="margin: 40px; color: darkblue">
@@ -47,7 +49,7 @@
 		<h1 bold>Test</h1>
 		<p inner-text="hello world"></p>
 		<article></article>
-
+		<!--<test-block bold>This doesn't suppose to get parsed</test-block>-->
 		<article>
 			<h1 bold>Test</h1>
 			<p inner-text="hello world"></p>
@@ -62,11 +64,30 @@
     */
 
 			console.log('Page loaded successfully!')
-      console.log(`		<article>
+			console.log(`		<article>
 			<h1 bold>Test</h1>
 			<p inner-text="hello world"></p>
 		</article>`)
 			alert('JS is working!')
+			//<test-block bold>This doesn't suppose to get parsed</test-block>
 		</script>
+
+		<style>
+			/* This styles the body */
+			body {
+				background-color: #f0f0f0;
+			}
+
+			/* Style for paragraph */
+			p {
+				color: green;
+				font-size: 16px;
+			}
+
+			/* Void tags like img won't be styled here but here's a sample */
+			img {
+				border: 2px solid black;
+			}
+		</style>
 	</body>
 </html>

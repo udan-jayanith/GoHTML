@@ -1,5 +1,5 @@
 ## v0.0.0-beta.3
--bug: comments error in decoder.
+-bug: some css and js code get selected as comments.
 
 ## v0.0.0
 QuerySelector takes attribute name and regexp for the value and returns the first node that matches the regexp.  

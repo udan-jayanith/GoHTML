@@ -2,6 +2,7 @@ package GoHtml
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"regexp"
 	"strings"
@@ -37,6 +38,7 @@ func Decode(rd io.Reader) (*Node, error) {
 			readingComment = getStartingComment(currentNode, str)
 		} else if readingComment != "" && isEndingComment(currentNode, readingComment, str) {
 			readingComment = ""
+			fmt.Println("captured comments", str)
 			str = ""
 		}
 
@@ -98,10 +100,10 @@ func Decode(rd io.Reader) (*Node, error) {
 }
 
 var (
-	startingBlockCommentReg = regexp.MustCompile(`\s*\/\*\s*$`)
-	endingBlockCommentReg = regexp.MustCompile(`\s*\*\/\s*$`)
-	doubleSlashReg = regexp.MustCompile(`//$`)
-	htmlCommentStarterReg = regexp.MustCompile(`<!--$`)
+	startingBlockCommentReg = regexp.MustCompile(`\s*(\/\*)\s*$`)
+	endingBlockCommentReg = regexp.MustCompile(`\s*(\*\/)\s*$`)
+	doubleSlashReg = regexp.MustCompile(`\s*(//)\s*$`)
+	htmlCommentStarterReg = regexp.MustCompile(`\s*(<!--)\s*$`)
 )
 
 func isStartingComment(currentNode *Node, str string) bool {
@@ -182,7 +184,7 @@ func isSelfClosingNode(node *Node) bool {
 
 var (
 	tagNameRegex          = regexp.MustCompile(`^\s*([\w\-_!]*)`)
-	afterTagNameReg       = regexp.MustCompile(`^\s*[\w\-_]*\s*(.*)`)
+	afterTagNameReg       = regexp.MustCompile(`^\s*[\w\-_!]*\s*(.*)`)
 	attributeNameReg      = regexp.MustCompile(`^\s*([\w\-_!]*)\s*`)
 	afterAttributeNameReg = regexp.MustCompile(`^\s*[\w\-_!]*\s*(.*)`)
 	isDefinedValueReg     = regexp.MustCompile(`^\s*=.*`)
