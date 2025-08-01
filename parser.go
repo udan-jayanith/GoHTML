@@ -2,7 +2,6 @@ package GoHtml
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"regexp"
 	"strings"
@@ -38,8 +37,7 @@ func Decode(rd io.Reader) (*Node, error) {
 			readingComment = getStartingComment(currentNode, str)
 		} else if readingComment != "" && isEndingComment(currentNode, readingComment, str) {
 			readingComment = ""
-			fmt.Println("captured comments", str)
-			str = ""
+			str = escapeComments(str, currentNode)
 		}
 
 		if readingComment != "" {
@@ -117,8 +115,8 @@ func isStartingComment(currentNode *Node, str string) bool {
 }
 
 var(
-	endingNewLineReg = regexp.MustCompile(`\n$`)
-	htmlCommentEndReg = regexp.MustCompile(`-->$`)
+	endingNewLineReg = regexp.MustCompile(`(\n)\s*$`)
+	htmlCommentEndReg = regexp.MustCompile(`(-->)\s*$`)
 )
 
 func isEndingComment(currentNode *Node, startingComment string, str string) bool {
@@ -142,6 +140,24 @@ func getStartingComment(currentNode *Node, str string) string {
 	}
 
 	return getRightMostString(htmlCommentStarterReg.FindStringSubmatch(str))
+}
+
+var(
+	htmlCommentReg = regexp.MustCompile(`(?s)<!--.*-->`)
+	blockCommentReg = regexp.MustCompile(`(?s)\/\*.*\*\/`)
+	inlineCommentReg = regexp.MustCompile(`(?s)\/\/.*\n`)
+)
+
+func escapeComments(str string, currentNode *Node) string{
+	if currentNode.GetTagName() == "script"{
+		str = blockCommentReg.ReplaceAllLiteralString(str, "")
+		str = inlineCommentReg.ReplaceAllLiteralString(str, "")
+	}else if currentNode.GetTagName() == "style"{
+		str = blockCommentReg.ReplaceAllLiteralString(str, "")
+	}else{
+		str = htmlCommentReg.ReplaceAllLiteralString(str, "")
+	}
+	return str
 }
 
 func getFirstOpenNode(currentNode *Node, stack *linkedliststack.Stack) (*Node, error) {
