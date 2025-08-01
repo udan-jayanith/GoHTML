@@ -1,6 +1,7 @@
 package GoHtml
 
 import (
+	"strings"
 	"sync"
 )
 
@@ -78,6 +79,10 @@ func (node *Node) GetTagName() string{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
+	if strings.ToUpper(node.tagName) == DOCTYPEDTD{
+		return strings.ToUpper(node.tagName)
+	}
+
 	return node.tagName
 }
 
@@ -86,15 +91,16 @@ func (node *Node) SetTagName(tagName string){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
-	node.tagName = tagName
+	node.tagName = strings.TrimSpace(strings.ToLower(tagName))
 }
 
-//GetAttribute returns the specified attribute form the node.
-func (node *Node) GetAttribute(attributeName string) string{
+//GetAttribute returns the specified attribute value form the node.
+func (node *Node) GetAttribute(attributeName string) (string, bool){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
-	return node.attributes[attributeName]
+	v, ok := node.attributes[attributeName]
+	return v, ok
 }
 
 //RemoveAttribute remove or delete the specified attribute.
@@ -120,7 +126,7 @@ func (node *Node) SetAttribute(attribute, value string){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
-	node.attributes[attribute] = value
+	node.attributes[strings.TrimSpace(attribute)] = strings.TrimSpace(value)
 }
 
 //GetText returns text on the node. This does not returns text on it's child nodes. If you also wants child nodes text use GetInnerText method on the node.

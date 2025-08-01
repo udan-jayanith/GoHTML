@@ -1,12 +1,18 @@
 /*
-A powerful and comprehensive HTML parser and DOM manipulation library for Go, 
+A powerful and comprehensive HTML parser and DOM manipulation library for Go,
 bringing JavaScript-like DOM operations to the Go ecosystem.
 */
 package GoHtml
 
 import (
+	"fmt"
+	"regexp"
 	"strings"
 	"sync"
+)
+
+var (
+	SyntaxError error = fmt.Errorf("Syntax error")
 )
 
 //CreateNode returns a initialized new node.
@@ -66,4 +72,13 @@ func ApplySaveChanges(node *Node){
 		parentNode.childNode = node
 		parentNode.rwMutex.Unlock()
 	}
+}
+
+func isQuote(chr string) bool {
+	return chr == `"` || chr == `'` || chr == "`"
+}
+
+func isDigit(value string) bool {
+	reg := regexp.MustCompile(`^[\d\.]+$`)
+	return reg.Match([]byte(value))
 }
