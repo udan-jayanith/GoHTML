@@ -1,4 +1,4 @@
-## v0.0.0-beta.3
+## v0.0.0-beta.3 <- current
 
 ## v0.0.0
 Delete deletes the branch without connecting sibling nodes.
