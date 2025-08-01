@@ -10,8 +10,8 @@ import (
 )
 
 var(
-	closingTagReg = regexp.MustCompile(`^\s*<\/.*>\s*$`)
-	openingTagReg =  regexp.MustCompile(`^\s*<.*>\s*$`)
+	closingTagReg = regexp.MustCompile(`(?s)^\s*<\/.*>\s*$`)
+	openingTagReg =  regexp.MustCompile(`(?s)^\s*<.*>\s*$`)
 )
 
 // Decode reads from rd and create a node-tree. Then returns the root node and an error. If error were to occur it would be SyntaxError.
@@ -203,10 +203,10 @@ var (
 	afterTagNameReg       = regexp.MustCompile(`^\s*[\w\-_!]*\s*(.*)`)
 	attributeNameReg      = regexp.MustCompile(`^\s*([\w\-_!]*)\s*`)
 	afterAttributeNameReg = regexp.MustCompile(`^\s*[\w\-_!]*\s*(.*)`)
-	isDefinedValueReg     = regexp.MustCompile(`^\s*=.*`)
-	afterEqualSignReg     = regexp.MustCompile(`^\s*=(.*)`)
-	definedValueReg       = regexp.MustCompile(`\s*(\s*('.*?'|".*?"|\s*[\S]*).*).*`)
-	afterDefinedValueReg  = regexp.MustCompile(`\s*('.*?'|".*?"|\s*[\S]*)\s*(.*)\s*`)
+	isDefinedValueReg     = regexp.MustCompile(`(?s)^\s*=.*`)
+	afterEqualSignReg     = regexp.MustCompile(`(?s)^\s*=(.*)`)
+	definedValueReg       = regexp.MustCompile(`(?s)\s*(\s*('.*?'|".*?"|\s*[\S]*).*).*`)
+	afterDefinedValueReg  = regexp.MustCompile(`(?s)\s*('.*?'|".*?"|\s*[\S]*)\s*(.*)\s*`)
 )
 
 func serializeHTMLTag(tag string) (*Node, error) {
@@ -289,7 +289,7 @@ func HTMLToNodeTree(html string) (*Node, error) {
 }
 
 var (
-	escapeQuotesReg *regexp.Regexp = regexp.MustCompile(`^\s*('(.*)'|"(.*)"|([\d+\.]*)|.*)\s*$`)
+	escapeQuotesReg *regexp.Regexp = regexp.MustCompile(`(?s)^\s*('(.*)'|"(.*)"|([\d+\.]*)|.*)\s*$`)
 )
 
 func escapeQuotes(str string) string {

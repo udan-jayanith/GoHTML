@@ -1,5 +1,4 @@
 ## v0.0.0-beta.3
--bug: some css and js code get selected as comments.
 
 ## v0.0.0
 Delete deletes the branch without connecting sibling nodes.
