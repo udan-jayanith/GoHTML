@@ -79,6 +79,10 @@ func (node *Node) GetTagName() string{
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
+	if strings.ToUpper(node.tagName) == DOCTYPEDTD{
+		return strings.ToUpper(node.tagName)
+	}
+
 	return node.tagName
 }
 
@@ -90,12 +94,13 @@ func (node *Node) SetTagName(tagName string){
 	node.tagName = strings.TrimSpace(strings.ToLower(tagName))
 }
 
-//GetAttribute returns the specified attribute form the node.
-func (node *Node) GetAttribute(attributeName string) string{
+//GetAttribute returns the specified attribute value form the node.
+func (node *Node) GetAttribute(attributeName string) (string, bool){
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
-	return node.attributes[attributeName]
+	v, ok := node.attributes[attributeName]
+	return v, ok
 }
 
 //RemoveAttribute remove or delete the specified attribute.

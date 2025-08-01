@@ -2,6 +2,9 @@
 -bug: some css and js code get selected as comments.
 
 ## v0.0.0
+Delete deletes the branch without connecting sibling nodes.
+* Delete
+
 QuerySelector takes attribute name and regexp for the value and returns the first node that matches the regexp.  
 * QuerySelector
 
