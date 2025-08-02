@@ -225,6 +225,7 @@ func (node *Node) RemoveNode() {
 
 	previousNode := node.previousNode
 	nextNode := node.nextNode
+	parentNode := node.parentNode
 
 	node.previousNode = nil
 	node.nextNode = nil
@@ -237,16 +238,10 @@ func (node *Node) RemoveNode() {
 	if nextNode != nil {
 		nextNode.SetPreviousNode(previousNode)
 	}
-}
 
-// DeleteNode removes the node without connecting sibling nodes.
-func (node *Node) DeleteNode() {
-	node.rwMutex.Lock()
-	defer node.rwMutex.Unlock()
-
-	node.previousNode = nil
-	node.nextNode = nil
-	node.parentNode = nil
+	if nextNode != nil{
+		nextNode.setParentNode(parentNode)
+	}
 }
 
 // IsTextNode returns a boolean value indicating node is a text node or not.
