@@ -109,4 +109,7 @@ func TestRemoveNode(t *testing.T){
 	}else if p.GetParent() != article {
 		t.Fatal("Unexpected parent.")
 	}
+
+	//p.RemoveNode()
+	//t.Log(GoHtml.NodeTreeToHTML(article))
 }
