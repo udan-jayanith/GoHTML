@@ -1,7 +1,7 @@
 ## v0.0.0-beta.3 <- current
 
 ## v0.0.0
-Delete deletes the branch without connecting sibling nodes.
+Delete deletes the node without connecting sibling nodes.
 * Delete
 
 QuerySelector takes attribute name and regexp for the value and returns the first node that matches the regexp.  
