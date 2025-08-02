@@ -49,7 +49,7 @@ func DeepCloneNode(node *Node) *Node{
 	return &newNode
 }
 
-//CloneNode copy the node.
+//CloneNode copy the node. But have one way connections to it's parent, next and previous nodes.
 func CloneNode(node *Node) *Node{ 
 	newNode := DeepCloneNode(node)
 	newNode.setParentNode(node.getParentNode())
@@ -57,21 +57,6 @@ func CloneNode(node *Node) *Node{
 	newNode.SetNextNode(node.GetNextNode())
 
 	return newNode
-}
-
-//ApplySaveChanges replaces the nodes previous and parent node with the given node.
-func ApplySaveChanges(node *Node){
-	previousNode := node.GetPreviousNode()
-	if previousNode != nil{
-		previousNode.SetNextNode(node)
-	}
-
-	parentNode := node.getParentNode()
-	if parentNode != nil{
-		parentNode.rwMutex.Lock()
-		parentNode.childNode = node
-		parentNode.rwMutex.Unlock()
-	}
 }
 
 func isQuote(chr string) bool {
