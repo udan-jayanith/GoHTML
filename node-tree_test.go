@@ -87,3 +87,29 @@ func TestAppendTextAndInnerText(t *testing.T){
 	}
 
 }
+
+func TestRemoveNode(t *testing.T){
+	article := GoHtml.CreateNode("article")
+	
+	h1 := GoHtml.CreateNode("h1")
+	h1.AppendText("This is a heading.")
+	article.AppendChild(h1)
+
+	article.AppendChild(GoHtml.CreateNode(GoHtml.Br))
+
+	p := GoHtml.CreateNode("p")
+	p.AppendText("this is a paragraph.")
+	article.AppendChild(p)
+
+	h1.RemoveNode()
+
+	if article.GetChildNode().GetTagName() != GoHtml.Br{
+		t.Fatal("Unexpected tag. ", article.GetChildNode().GetTagName())
+		return
+	}else if p.GetParent() != article {
+		t.Fatal("Unexpected parent.")
+	}
+
+	//p.RemoveNode()
+	//t.Log(GoHtml.NodeTreeToHTML(article))
+}

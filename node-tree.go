@@ -229,6 +229,7 @@ func (node *Node) RemoveNode() {
 
 	node.previousNode = nil
 	node.nextNode = nil
+	node.parentNode = nil
 
 	node.rwMutex.Unlock()
 
@@ -239,8 +240,12 @@ func (node *Node) RemoveNode() {
 		nextNode.SetPreviousNode(previousNode)
 	}
 
-	if nextNode != nil{
+	if nextNode != nil && previousNode == nil{
 		nextNode.setParentNode(parentNode)
+	}
+
+	if parentNode != nil{
+		parentNode.childNode = nextNode
 	}
 }
 

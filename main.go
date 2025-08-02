@@ -37,6 +37,10 @@ func DeepCloneNode(node *Node) *Node{
 	attributes := node.attributes
 	node.rwMutex.Unlock()
 
+	if node == nil {
+		return node
+	}
+
 	newNode := Node{
 		childNode: node.GetChildNode(),
 		tagName: node.GetTagName(),
