@@ -38,4 +38,17 @@ func (node *Node) GetElementByClassName(className string) *Node {
 	return returnNode
 }
 
-//func (node *Node) GetElementByID(idName string) *Node
+func (node *Node) GetElementByID(idName string) *Node{
+	traverser := GetTraverser(node)
+	var returnNode *Node
+	traverser.Walkthrough(func(node *Node) TraverseCondition {
+		id, _ := node.GetAttribute("id") 
+		if id == idName{
+			returnNode = node
+			return StopWalkthrough
+		}
+		return ContinueWalkthrough
+	})
+	return returnNode
+}
+

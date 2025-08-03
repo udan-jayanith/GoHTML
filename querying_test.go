@@ -50,3 +50,28 @@ func TestGetElementBy(t *testing.T) {
 		return
 	}
 }
+
+func TestGetElementByID(t *testing.T){
+	file, err := os.Open("./test-files/3.html")
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	node, err := GoHtml.Decode(file)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	heading := node.GetElementByID("hello-world")
+	if heading == nil {
+		t.Fatal("Heading is nil")
+		return
+	}
+	id, _ := heading.GetAttribute("id")
+	if id != "hello-world"{
+		t.Fatal("unexpected id", id, heading)
+		return
+	}
+}
