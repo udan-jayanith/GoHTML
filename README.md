@@ -20,6 +20,10 @@ import (
  * Serialization
  * Node tree tarversing
  * Querying
+ * Concurrency safty
+
+## Concurrency safety
+Node tree itself is not concurrency safe but nodes and everything other then node trees are concurrency safe.
 
 ## Documentation
 Fully fledged [documentation](https://pkg.go.dev/github.com/udan-jayanith/GoHTML) is available at [go.pkg](https://pkg.go.dev/)
