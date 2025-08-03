@@ -3,28 +3,36 @@ package GoHtml
 import (
 	"container/list"
 	"iter"
+	"sync"
 )
 
 type NodeList struct {
 	list      *list.List
 	currentEl *list.Element
+	rwMutex   *sync.Mutex
 }
 
 // New returns an initialized node list.
 func NewNodeList() NodeList {
 	return NodeList{
-		list: list.New(),
+		list:      list.New(),
 		currentEl: nil,
+		rwMutex:   &sync.Mutex{},
 	}
 }
 
 // Len returns the number of node in the list. The complexity is O(1).
 func (nl *NodeList) Len() int {
+	nl.rwMutex.Lock()
+	defer nl.rwMutex.Unlock()
 	return nl.list.Len()
 }
 
 // Next advanced to the next node and returns that node.
 func (nl *NodeList) Next() *Node {
+	nl.rwMutex.Lock()
+	defer nl.rwMutex.Unlock()
+
 	if nl.currentEl == nil {
 		nl.currentEl = nl.list.Front()
 	} else {
@@ -38,6 +46,9 @@ func (nl *NodeList) Next() *Node {
 
 // Previous advanced to the previous node and return that node.
 func (nl *NodeList) Previous() *Node {
+	nl.rwMutex.Lock()
+	defer nl.rwMutex.Unlock()
+
 	if nl.currentEl == nil {
 		nl.currentEl = nl.list.Front()
 	} else {
@@ -51,6 +62,9 @@ func (nl *NodeList) Previous() *Node {
 
 // Back returns the last node of list or nil if the list is empty.
 func (nl *NodeList) Back() *Node {
+	nl.rwMutex.Lock()
+	defer nl.rwMutex.Unlock()
+
 	if nl.list.Back() == nil {
 		return nil
 	}
@@ -59,6 +73,9 @@ func (nl *NodeList) Back() *Node {
 
 // Front returns the first node of list or nil if the list is empty.
 func (nl *NodeList) Front() *Node {
+	nl.rwMutex.Lock()
+	defer nl.rwMutex.Unlock()
+
 	if nl.list.Front() == nil {
 		return nil
 	}
@@ -67,10 +84,13 @@ func (nl *NodeList) Front() *Node {
 
 // Append append a node to the back of the list.
 func (nl *NodeList) Append(node *Node) {
+	nl.rwMutex.Lock()
+	defer nl.rwMutex.Unlock()
+
 	nl.list.PushBack(node)
 }
 
-//IterNodeList returns a iterator over the node list.
+// IterNodeList returns a iterator over the node list.
 func (nl *NodeList) IterNodeList() iter.Seq[*Node] {
 	return func(yield func(*Node) bool) {
 		nodeList := NewNodeList()
