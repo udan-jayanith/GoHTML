@@ -20,7 +20,7 @@ import (
  * Serialization
  * Node tree tarversing
  * Querying
- * Concurrency safty
+ * [Concurrency safety](#concurrency-safety)
 
 ## Concurrency safety
 Node tree itself is not concurrency safe but nodes and everything other then node trees are concurrency safe.
