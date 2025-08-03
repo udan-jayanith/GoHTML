@@ -182,7 +182,7 @@ func (node *Node) GetParent() *Node {
 
 // GetLastNode returns the last node in the node branch.
 func (node *Node) GetLastNode() *Node {
-	traverser := GetTraverser(node)
+	traverser := NewTraverser(node)
 	for traverser.GetCurrentNode().GetNextNode() != nil {
 		traverser.Next()
 	}
@@ -191,7 +191,7 @@ func (node *Node) GetLastNode() *Node {
 
 // GetFirstNode returns the first node of the node branch.
 func (node *Node) GetFirstNode() *Node {
-	traverser := GetTraverser(node)
+	traverser := NewTraverser(node)
 	for traverser.GetCurrentNode().GetPreviousNode() != nil {
 		traverser.Previous()
 	}
@@ -213,7 +213,7 @@ func (node *Node) AppendText(text string) {
 // GetInnerText returns all of the text inside the node.
 func (node *Node) GetInnerText() string {
 	text := ""
-	traverser := GetTraverser(node.childNode)
+	traverser := NewTraverser(node.childNode)
 	traverser.Walkthrough(func(node *Node) TraverseCondition {
 		if node.GetTagName() != "" {
 			return ContinueWalkthrough
@@ -253,6 +253,7 @@ func (node *Node) RemoveNode() {
 	if parentNode != nil {
 		parentNode.childNode = nextNode
 	}
+
 }
 
 // IsTextNode returns a boolean value indicating node is a text node or not.

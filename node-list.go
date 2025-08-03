@@ -6,6 +6,7 @@ import (
 	"sync"
 )
 
+//NodeList can store nodes by append order.
 type NodeList struct {
 	list      *list.List
 	currentEl *list.Element

@@ -21,7 +21,7 @@ func TestIterNodeList(t *testing.T) {
 	}
 
 	list := GoHtml.NewNodeList()
-	traverser := GoHtml.GetTraverser(node)
+	traverser := GoHtml.NewTraverser(node)
 	traverser.Walkthrough(func(node *GoHtml.Node) GoHtml.TraverseCondition {
 		list.Append(node)
 		return GoHtml.ContinueWalkthrough
@@ -29,10 +29,6 @@ func TestIterNodeList(t *testing.T) {
 
 	iterator := list.IterNodeList()
 	for node := range iterator{
-		if node.IsTextNode(){
-			t.Log(node.GetText())
-		}else{
-			t.Log(node.GetTagName())
-		}
+		node.RemoveNode()
 	}
 }

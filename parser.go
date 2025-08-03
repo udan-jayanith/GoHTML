@@ -161,7 +161,7 @@ func escapeComments(str string, currentNode *Node) string{
 }
 
 func getFirstOpenNode(currentNode *Node, stack *linkedliststack.Stack) (*Node, error) {
-	traverser := GetTraverser(currentNode)
+	traverser := NewTraverser(currentNode)
 	for traverser.GetCurrentNode() != nil {
 		n, ok := stack.Peek()
 		if !ok {

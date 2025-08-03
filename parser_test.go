@@ -21,7 +21,7 @@ func TestDecode(t *testing.T) {
 		return
 	}
 
-	traverser := GoHtml.GetTraverser(node)
+	traverser := GoHtml.NewTraverser(node)
 	traverser.Walkthrough(func(node *GoHtml.Node) GoHtml.TraverseCondition {
 		attributeValue, ok := node.GetAttribute("inner-text")
 		if attributeValue == "js" && ok {

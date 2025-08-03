@@ -11,7 +11,7 @@ type Traverser struct {
 }
 
 // GetTraverser returns a new traverser that can be used to navigate the node tree.
-func GetTraverser(startingNode *Node) Traverser {
+func  NewTraverser(startingNode *Node) Traverser {
 	return Traverser{
 		currentNode: startingNode,
 		rwMutex:     sync.Mutex{},

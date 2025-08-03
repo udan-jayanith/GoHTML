@@ -4,9 +4,8 @@
 * GetElementByClassName
 * GetElementByTagName
 * GetElementById
+* NodeList
 * GetElementsByClassName
 * GetElementsByTagName
 * GetElementsById
-
-## v0.0.2
 * Closest
