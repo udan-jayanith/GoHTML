@@ -28,6 +28,9 @@ func (nl *NodeList) Next() *Node {
 	if nl.currentEl == nil {
 		nl.currentEl = nl.list.Front()
 	} else {
+		if nl.currentEl.Next() == nil {
+			return nil
+		}
 		nl.currentEl = nl.currentEl.Next()
 	}
 	return nl.currentEl.Value.(*Node)
@@ -38,6 +41,9 @@ func (nl *NodeList) Previous() *Node {
 	if nl.currentEl == nil {
 		nl.currentEl = nl.list.Front()
 	} else {
+		if nl.currentEl.Prev() == nil {
+			return nil
+		}
 		nl.currentEl = nl.currentEl.Prev()
 	}
 	return nl.currentEl.Value.(*Node)
@@ -45,11 +51,17 @@ func (nl *NodeList) Previous() *Node {
 
 // Back returns the last node of list or nil if the list is empty.
 func (nl *NodeList) Back() *Node {
+	if nl.list.Back() == nil {
+		return nil
+	}
 	return nl.list.Back().Value.(*Node)
 }
 
 // Front returns the first node of list or nil if the list is empty.
 func (nl *NodeList) Front() *Node {
+	if nl.list.Front() == nil {
+		return nil
+	}
 	return nl.list.Front().Value.(*Node)
 }
 

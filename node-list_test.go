@@ -29,6 +29,10 @@ func TestIterNodeList(t *testing.T) {
 
 	iterator := list.IterNodeList()
 	for node := range iterator{
-		t.Log(node.GetTagName())
+		if node.IsTextNode(){
+			t.Log(node.GetText())
+		}else{
+			t.Log(node.GetTagName())
+		}
 	}
 }
