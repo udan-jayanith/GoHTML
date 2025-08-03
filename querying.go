@@ -37,3 +37,5 @@ func (node *Node) GetElementByClassName(className string) *Node {
 	})
 	return returnNode
 }
+
+//func (node *Node) GetElementByID(idName string) *Node

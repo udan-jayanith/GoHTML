@@ -1,6 +1,7 @@
 package GoHtml
 
 import (
+	"iter"
 	"strings"
 	"sync"
 )
@@ -111,14 +112,19 @@ func (node *Node) RemoveAttribute(attributeName string) {
 	delete(node.attributes, attributeName)
 }
 
-// IterateAttributes calls callback at every attribute in the node by passing attribute and value of the node.
-func (node *Node) IterateAttributes(callback func(attribute, value string)) {
-	node.rwMutex.Lock()
-	attributes := node.attributes
-	node.rwMutex.Unlock()
+// IterAttributes returns a iterator that can be used with range keyword. 
+// Where a(first value) is attribute name v(2nd value) is the attribute value.
+func (node *Node) IterAttributes() iter.Seq2[string, string] {
+	return func(yield func(string, string) bool) {
+		node.rwMutex.Lock()
+		attributes := node.attributes
+		node.rwMutex.Unlock()
 
-	for k, v := range attributes {
-		callback(k, v)
+		for k, v := range attributes {
+			if !yield(k, v) {
+				return
+			}
+		}
 	}
 }
 
@@ -240,11 +246,11 @@ func (node *Node) RemoveNode() {
 		nextNode.SetPreviousNode(previousNode)
 	}
 
-	if nextNode != nil && previousNode == nil{
+	if nextNode != nil && previousNode == nil {
 		nextNode.setParentNode(parentNode)
 	}
 
-	if parentNode != nil{
+	if parentNode != nil {
 		parentNode.childNode = nextNode
 	}
 }
