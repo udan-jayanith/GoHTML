@@ -32,6 +32,7 @@ func (classList ClassList) AppendClass(className string) {
 }
 
 // SetClass append classes in the node to classList.
+// If node is nil SetClass does nothing.
 func (classList ClassList) SetClass(node *Node) {
 	if node == nil {
 		return 
@@ -83,6 +84,7 @@ func (classList ClassList) Encode() string {
 }
 
 // EncodeTo encode className for the node.
+// If node is nil EncodeTo does nothing.
 func (classList ClassList) EncodeTo(node *Node){
 	if node == nil {
 		return

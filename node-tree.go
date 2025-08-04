@@ -149,7 +149,7 @@ func (node *Node) SetText(text string) {
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
-	node.text = text
+	node.text = escapeHTML(text)
 }
 
 // The AppendChild() method of the Node adds a node to the end of the list of children of a specified parent node.
@@ -200,9 +200,7 @@ func (node *Node) GetFirstNode() *Node {
 
 // AppendText append text to the node.
 func (node *Node) AppendText(text string) {
-	textNode := CreateNode("")
-	textNode.SetText(text)
-
+	textNode := CreateTextNode(text)
 	if node.GetTagName() == "" || IsVoidTag(node.GetTagName()) {
 		node.GetLastNode().Append(textNode)
 		return
