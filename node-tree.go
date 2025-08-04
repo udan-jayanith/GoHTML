@@ -141,7 +141,12 @@ func (node *Node) GetText() string {
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
-	return node.text
+	text := node.text
+	text = strings.ReplaceAll(text, "&amp;" ,"&")
+	text = strings.ReplaceAll(text, "&lt;", "<")
+	text = strings.ReplaceAll(text, "&gt;", ">")
+
+	return text
 }
 
 // SetText add text to the node.

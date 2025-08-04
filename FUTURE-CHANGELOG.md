@@ -9,4 +9,4 @@
 * GetElementsByTagName
 * GetElementsById
 * Closest.
-* Escape html in text nodes when creating.
+* HTML Entity .
