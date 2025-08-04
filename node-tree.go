@@ -6,8 +6,8 @@ import (
 	"sync"
 )
 
-// The DOM Node struct is an abstract base class upon which many other DOM API objects are based, thus letting
-// those object types to be used similarly and often interchangeably.
+// Node is a struct that represents a html elements. Nodes can have sibling nodes(NextNode and Previous Node) and child node that represent the child elements.
+// Text is also stored as a node which can be checked by using IsTextNode method.   
 type Node struct {
 	nextNode     *Node
 	previousNode *Node

@@ -8,7 +8,7 @@ Run the following command in project directory in order to install.
 go get github.com/udan-jayanith/GoHTML
 ```
 
-Then import like this
+Then GoHTML can import like this.
 ```go
 import (
 	GoHtml "github.com/udan-jayanith/GoHTML"
@@ -18,7 +18,7 @@ import (
 ## Features
  * Parsing
  * Serialization
- * Node tree tarversing
+ * Node tree traversing
  * Querying
  * [Concurrency safety](#concurrency-safety)
 

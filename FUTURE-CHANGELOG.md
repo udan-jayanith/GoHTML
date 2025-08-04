@@ -8,4 +8,5 @@
 * GetElementsByClassName
 * GetElementsByTagName
 * GetElementsById
-* Closest
+* Closest.
+* Escape html in text nodes when creating.

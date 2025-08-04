@@ -35,6 +35,7 @@ func (t *Traverser) SetCurrentNodeTo(newNode *Node) {
 }
 
 // Next returns the node next to current node and change CurrentNode to the new node.
+// Make sure t.currentNode is not nil otherwise program will panic.
 func (t *Traverser) Next() *Node {
 	currentNode := t.GetCurrentNode()
 	t.SetCurrentNodeTo(currentNode.GetNextNode())
@@ -42,6 +43,7 @@ func (t *Traverser) Next() *Node {
 }
 
 // Previous returns the previous node and change CurrentNode to the new node.
+// Make sure t.currentNode is not nil otherwise program will panic.
 func (t *Traverser) Previous() *Node {
 	currentNode := t.GetCurrentNode()
 	t.SetCurrentNodeTo(currentNode.GetPreviousNode())
