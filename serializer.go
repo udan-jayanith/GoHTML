@@ -18,14 +18,14 @@ func wrapAttributeValue(value string) string {
 
 func encodeListAttributes(node *Node) string {
 	w := strings.Builder{}
-	attributes := node.IterAttributes()
-	for a, v := range attributes{
-		if strings.TrimSpace(v) == "" {
-			w.Write(fmt.Appendf(nil, " %s", a))
+	node.IterateAttributes(func(attribute, value string) {
+		if strings.TrimSpace(attribute) == "" {
+			w.Write(fmt.Appendf(nil, " %s", attribute))
 		} else {
-			w.Write(fmt.Appendf(nil, " %s=%s", a, wrapAttributeValue(v)))
+			w.Write(fmt.Appendf(nil, " %s=%s", attribute, wrapAttributeValue(value)))
 		}
-	}
+	
+	})
 	return w.String()
 }
 

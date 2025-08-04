@@ -34,12 +34,15 @@ func (nl *NodeList) Next() *Node {
 	nl.rwMutex.Lock()
 	defer nl.rwMutex.Unlock()
 
-	if nl.currentEl == nil {
+	if nl.list.Len() == 0 {
+		return nil
+	}else if nl.currentEl == nil && nl.list.Len() > 0{
 		nl.currentEl = nl.list.Front()
 	} else {
-		if nl.currentEl.Next() == nil {
+		if nl.currentEl.Next() == nil{
 			return nil
 		}
+		
 		nl.currentEl = nl.currentEl.Next()
 	}
 	return nl.currentEl.Value.(*Node)
@@ -95,15 +98,16 @@ func (nl *NodeList) Append(node *Node) {
 }
 
 // IterNodeList returns a iterator over the node list.
-// Make sure NodeList is not empty by using Len method before using iter.Seq.
 func (nl *NodeList) IterNodeList() iter.Seq[*Node] {
 	return func(yield func(*Node) bool) {
 		nodeList := NewNodeList()
 		nodeList.list = nl.list
 
 		nextNode := nodeList.Next()
-		for nextNode != nil {
-			if !yield(nextNode) {
+		for {
+			if nextNode == nil {
+				return
+			}else if !yield(nextNode) {
 				return
 			}
 			nextNode = nodeList.Next()

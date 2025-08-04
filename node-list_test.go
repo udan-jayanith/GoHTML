@@ -33,3 +33,10 @@ func TestIterNodeList1(t *testing.T) {
 	}
 }
 
+func TestIterNodeList2(t *testing.T){
+	nodeList := GoHtml.NewNodeList()
+	iter := nodeList.IterNodeList()
+	for node := range iter{
+		t.Log(node)
+	}
+}
