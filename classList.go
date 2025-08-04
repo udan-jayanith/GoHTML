@@ -31,9 +31,9 @@ func (classList ClassList) AppendClass(className string) {
 	}
 }
 
-// SetClass append classes in the node to classList.
+// DecodeFrom append classes in the node to classList.
 // If node is nil SetClass does nothing.
-func (classList ClassList) SetClass(node *Node) {
+func (classList ClassList) DecodeFrom(node *Node) {
 	if node == nil {
 		return 
 	}

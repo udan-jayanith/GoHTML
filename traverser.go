@@ -10,7 +10,7 @@ type Traverser struct {
 	rwMutex     sync.Mutex
 }
 
-// GetTraverser returns a new traverser that can be used to navigate the node tree.
+// NewTraverser returns a new traverser that can be used to navigate the node tree.
 func  NewTraverser(startingNode *Node) Traverser {
 	return Traverser{
 		currentNode: startingNode,

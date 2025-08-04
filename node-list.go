@@ -87,11 +87,15 @@ func (nl *NodeList) Front() *Node {
 func (nl *NodeList) Append(node *Node) {
 	nl.rwMutex.Lock()
 	defer nl.rwMutex.Unlock()
+	if node == nil{
+		return
+	}
 
 	nl.list.PushBack(node)
 }
 
 // IterNodeList returns a iterator over the node list.
+// Make sure NodeList is not empty by using Len method before using iter.Seq.
 func (nl *NodeList) IterNodeList() iter.Seq[*Node] {
 	return func(yield func(*Node) bool) {
 		nodeList := NewNodeList()

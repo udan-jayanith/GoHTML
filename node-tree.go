@@ -1,13 +1,12 @@
 package GoHtml
 
 import (
-	"iter"
 	"strings"
 	"sync"
 )
 
 // Node is a struct that represents a html elements. Nodes can have sibling nodes(NextNode and Previous Node) and child node that represent the child elements.
-// Text is also stored as a node which can be checked by using IsTextNode method.   
+// Text is also stored as a node which can be checked by using IsTextNode method.
 type Node struct {
 	nextNode     *Node
 	previousNode *Node
@@ -112,19 +111,14 @@ func (node *Node) RemoveAttribute(attributeName string) {
 	delete(node.attributes, attributeName)
 }
 
-// IterAttributes returns a iterator that can be used with range keyword. 
-// Where a(first value) is attribute name v(2nd value) is the attribute value.
-func (node *Node) IterAttributes() iter.Seq2[string, string] {
-	return func(yield func(string, string) bool) {
-		node.rwMutex.Lock()
-		attributes := node.attributes
-		node.rwMutex.Unlock()
+// IterateAttributes calls callback at every attribute in the node by passing attribute and value of the node.
+func (node *Node) IterateAttributes(callback func(attribute, value string)) {
+	node.rwMutex.Lock()
+	attributes := node.attributes
+	node.rwMutex.Unlock()
 
-		for k, v := range attributes {
-			if !yield(k, v) {
-				return
-			}
-		}
+	for k, v := range attributes {
+		callback(k, v)
 	}
 }
 
@@ -137,12 +131,13 @@ func (node *Node) SetAttribute(attribute, value string) {
 }
 
 // GetText returns text on the node. This does not returns text on it's child nodes. If you also wants child nodes text use GetInnerText method on the node.
+// HTML tags in returns value get escaped.
 func (node *Node) GetText() string {
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()
 
 	text := node.text
-	text = strings.ReplaceAll(text, "&amp;" ,"&")
+	text = strings.ReplaceAll(text, "&amp;", "&")
 	text = strings.ReplaceAll(text, "&lt;", "<")
 	text = strings.ReplaceAll(text, "&gt;", ">")
 
@@ -150,6 +145,7 @@ func (node *Node) GetText() string {
 }
 
 // SetText add text to the node.
+// HTML tags get escaped.
 func (node *Node) SetText(text string) {
 	node.rwMutex.Lock()
 	defer node.rwMutex.Unlock()

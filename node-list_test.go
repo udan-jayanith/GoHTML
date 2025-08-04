@@ -7,7 +7,7 @@ import (
 	GoHtml "github.com/udan-jayanith/GoHTML"
 )
 
-func TestIterNodeList(t *testing.T) {
+func TestIterNodeList1(t *testing.T) {
 	file, err := os.Open("./test-files/3.html")
 	if err != nil {
 		t.Fatal(err)
@@ -32,3 +32,4 @@ func TestIterNodeList(t *testing.T) {
 		node.RemoveNode()
 	}
 }
+

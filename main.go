@@ -25,6 +25,7 @@ func CreateNode(tagName string) *Node {
 }
 
 // CreateTextNode returns a new node that represents the given text.
+// HTML tags in text get escaped.
 func CreateTextNode(text string) *Node {
 	textNode := CreateNode("")
 	textNode.SetText(escapeHTML(text))
