@@ -50,7 +50,7 @@ func Encode(w io.Writer, rootNode *Node) {
 
 		tagName := current.GetTagName()
 		if tagName == "" {
-			w.Write([]byte(current.GetText()))
+			w.Write([]byte(escapeHTML(current.GetText())))
 		} else if IsVoidTag(tagName) {
 			fmt.Fprintf(w, "<%s%s>", tagName, encodeListAttributes(current))
 			if current.GetNextNode() != nil {

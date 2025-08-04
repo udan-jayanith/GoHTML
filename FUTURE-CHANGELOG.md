@@ -9,4 +9,3 @@
 * GetElementsByTagName
 * GetElementsById
 * Closest.
-* HTML Entity .
