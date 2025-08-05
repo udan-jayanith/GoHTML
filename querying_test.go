@@ -151,6 +151,5 @@ func TestGetElementsById(t *testing.T) {
 		if node.GetInnerText() != val.(string) {
 			t.Fatal("Unexpected node: ", node.GetInnerText(), val.(string))
 		}
-		t.Log(node)
 	}
 }
