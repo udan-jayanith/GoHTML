@@ -22,6 +22,14 @@ import (
  * Querying
  * [Concurrency safety](#concurrency-safety)
 
+## Changelog
+Changes, bug fixes and new features in this version.
+- add: NodeList
+- add: Querying helper functions
+- add: ClassList
+- bug fix: Empty attribute value parsing bug fixed
+- changed: Renamed GetTraverser to NewTraverser
+
 ## Concurrency safety
 Node tree itself is not concurrency safe but nodes and everything other then node trees are concurrency safe.
 
