@@ -258,6 +258,9 @@ func serializeHTMLTag(tag string) (*Node, error) {
 		}
 
 		attributeValue := strings.TrimSpace(getRightMostString(definedValueReg.FindStringSubmatch(tag)))
+		if attributeValue == `""` || attributeValue == `''`{
+			attributeValue = ""
+		}
 		node.SetAttribute(attributeName, escapeQuotes(attributeValue))
 
 		tag = strings.TrimSpace(getRightMostString(afterDefinedValueReg.FindStringSubmatch(tag)))

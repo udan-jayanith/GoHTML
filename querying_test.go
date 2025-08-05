@@ -101,10 +101,6 @@ func TestGetElementsByClassName(t *testing.T) {
 	stack.Push("Orange")
 	stack.Push("Apple")
 
-	if nodeList.Len() == 0 {
-		t.Fatal("NodeList is empty")
-	}
-
 	for node := range iterator {
 		value, ok := stack.Pop()
 		if !ok {
@@ -114,6 +110,9 @@ func TestGetElementsByClassName(t *testing.T) {
 		if node.GetInnerText() != text {
 			t.Fatal("Unexpected text", node)
 		}
+	}
+	if nodeList.Len() == 0 {
+		t.Fatal("NodeList is empty")
 	}
 }
 
@@ -124,26 +123,9 @@ func TestGetElementsByTagName(t *testing.T) {
 		return
 	}
 
-	nodeList := node.GetElementsByClassName("ordered-item")
-	iterator := nodeList.IterNodeList()
-	stack := linkedliststack.New()
-	stack.Push("Mango")
-	stack.Push("Orange")
-	stack.Push("Apple")
-
-	if nodeList.Len() == 0 {
-		t.Fatal("NodeList is empty")
-	}
-
-	for node := range iterator {
-		value, ok := stack.Pop()
-		if !ok {
-			t.Fatal("Stack is empty")
-		}
-		text := value.(string)
-		if node.GetInnerText() != text {
-			t.Fatal("Unexpected text", node)
-		}
+	nodeList := node.GetElementsByTagName("meta")
+	if nodeList.Len() != 2 {
+		t.Fatal(nodeList.Len())
 	}
 }
 
@@ -154,25 +136,21 @@ func TestGetElementsById(t *testing.T) {
 		return
 	}
 
-	nodeList := node.GetElementsByClassName("ordered-item")
-	iterator := nodeList.IterNodeList()
+	nodeList := node.GetElementsById("idElement")
+	iter := nodeList.IterNodeList()
 	stack := linkedliststack.New()
-	stack.Push("Mango")
-	stack.Push("Orange")
-	stack.Push("Apple")
+	stack.Push("Lorem")
+	stack.Push("")
 
-	if nodeList.Len() == 0 {
-		t.Fatal("NodeList is empty")
-	}
-
-	for node := range iterator {
-		value, ok := stack.Pop()
+	for node := range iter {
+		val, ok := stack.Pop()
 		if !ok {
-			t.Fatal("Stack is empty")
+			t.Fatal("Stack error.")
 		}
-		text := value.(string)
-		if node.GetInnerText() != text {
-			t.Fatal("Unexpected text", node)
+
+		if node.GetInnerText() != val.(string) {
+			t.Fatal("Unexpected node: ", node.GetInnerText(), val.(string))
 		}
+		t.Log(node)
 	}
 }

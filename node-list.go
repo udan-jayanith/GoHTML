@@ -33,7 +33,6 @@ func (nl *NodeList) Len() int {
 func (nl *NodeList) Next() *Node {
 	nl.rwMutex.Lock()
 	defer nl.rwMutex.Unlock()
-
 	if nl.list.Len() == 0 {
 		return nil
 	}else if nl.currentEl == nil && nl.list.Len() > 0{
@@ -42,7 +41,6 @@ func (nl *NodeList) Next() *Node {
 		if nl.currentEl.Next() == nil{
 			return nil
 		}
-		
 		nl.currentEl = nl.currentEl.Next()
 	}
 	return nl.currentEl.Value.(*Node)
@@ -104,10 +102,8 @@ func (nl *NodeList) IterNodeList() iter.Seq[*Node] {
 		nodeList.list = nl.list
 
 		nextNode := nodeList.Next()
-		for {
-			if nextNode == nil {
-				return
-			}else if !yield(nextNode) {
+		for nextNode != nil{
+			 if !yield(nextNode) {
 				return
 			}
 			nextNode = nodeList.Next()
