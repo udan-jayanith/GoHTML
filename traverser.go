@@ -1,37 +1,28 @@
 package GoHtml
 
 import (
-	"sync"
-
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 )
 
 type Traverser struct {
 	currentNode *Node
-	rwMutex     sync.Mutex
 }
 
 // NewTraverser returns a new traverser that can be used to navigate the node tree.
 func NewTraverser(startingNode *Node) Traverser {
 	return Traverser{
 		currentNode: startingNode,
-		rwMutex:     sync.Mutex{},
 	}
 }
 
 // GetCurrentNode returns the current node.
 func (t *Traverser) GetCurrentNode() *Node {
-	t.rwMutex.Lock()
-	defer t.rwMutex.Unlock()
 
 	return t.currentNode
 }
 
 // SetCurrentNodeTo changes the current node to the newNode.
 func (t *Traverser) SetCurrentNodeTo(newNode *Node) {
-	t.rwMutex.Lock()
-	defer t.rwMutex.Unlock()
-
 	t.currentNode = newNode
 }
 

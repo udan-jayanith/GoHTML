@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"sync"
 )
 
 var (
@@ -19,7 +18,6 @@ var (
 func CreateNode(tagName string) *Node {
 	return &Node{
 		tagName:    strings.ToLower(strings.TrimSpace(tagName)),
-		rwMutex:    sync.Mutex{},
 		attributes: make(map[string]string),
 	}
 }
@@ -38,18 +36,13 @@ func DeepCloneNode(node *Node) *Node {
 	if node == nil {
 		return node
 	}
-
-	node.rwMutex.Lock()
 	attributes := node.attributes
-	node.rwMutex.Unlock()
 
 	newNode := Node{
 		childNode:  node.GetChildNode(),
 		tagName:    node.GetTagName(),
 		attributes: attributes,
 		text:       node.GetText(),
-
-		rwMutex: sync.Mutex{},
 	}
 
 	return &newNode
