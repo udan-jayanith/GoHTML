@@ -24,7 +24,7 @@ func encodeListAttributes(node *Node) string {
 		} else {
 			w.Write(fmt.Appendf(nil, " %s=%s", attribute, wrapAttributeValue(value)))
 		}
-	
+
 	})
 	return w.String()
 }
@@ -35,6 +35,19 @@ func Encode(w io.Writer, rootNode *Node) {
 		node      *Node
 		openedTag bool
 	}
+
+	/*
+	traverser := NewTraverser(rootNode)
+	traverser.Walkthrough(func(node *Node) TraverseCondition {
+		fmt.Println("+++++++++++++++++++++++++++")
+		if node.IsTextNode() {
+			fmt.Println(node.text)
+		} else {
+			fmt.Println(node.GetTagName())
+		}
+		return ContinueWalkthrough
+	})
+	*/
 
 	stack := linkedliststack.New()
 	stack.Push(stackFrame{node: rootNode, openedTag: false})
@@ -47,6 +60,7 @@ func Encode(w io.Writer, rootNode *Node) {
 		if current == nil {
 			continue
 		}
+		//fmt.Println(current)
 
 		tagName := current.GetTagName()
 		if tagName == "" {

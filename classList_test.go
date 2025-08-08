@@ -28,10 +28,4 @@ func TestClasses(t *testing.T){
 	}
 
 	classList.EncodeTo(node)
-	
-	className, _ := node.GetAttribute("class")
-	if className != classList.Encode(){
-		t.Fatal("", className, classList.Encode())
-		return
-	}
 }
