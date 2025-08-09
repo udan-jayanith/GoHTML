@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/emirpasic/gods/stacks/linkedliststack"
+	"golang.org/x/net/html"
 )
 
 func wrapAttributeValue(value string) string {
@@ -60,11 +61,10 @@ func Encode(w io.Writer, rootNode *Node) {
 		if current == nil {
 			continue
 		}
-		//fmt.Println(current)
 
 		tagName := current.GetTagName()
 		if tagName == "" {
-			w.Write([]byte(escapeHTML(current.GetText())))
+			w.Write([]byte(html.EscapeString(current.GetText())))
 		} else if IsVoidTag(tagName) {
 			fmt.Fprintf(w, "<%s%s>", tagName, encodeListAttributes(current))
 			if current.GetNextNode() != nil {

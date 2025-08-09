@@ -49,7 +49,7 @@ func Decode(r io.Reader) (*Node, error) {
 				}
 			}
 
-			if IsTopNode(currentNode, stack){
+			if isTopNode(currentNode, stack){
 				currentNode.AppendChild(node)
 			}else{
 				currentNode.Append(node)
@@ -75,7 +75,7 @@ func HTMLToNodeTree(html string) (*Node, error) {
 	return node, err
 }
 
-func IsTopNode(node *Node, stack *linkedliststack.Stack) bool {
+func isTopNode(node *Node, stack *linkedliststack.Stack) bool {
 	val, ok := stack.Peek()
 	if !ok || val == nil {
 		return false

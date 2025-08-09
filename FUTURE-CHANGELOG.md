@@ -8,4 +8,3 @@
 * GetElementsByClassName
 * GetElementsByTagName
 * GetElementsById
-* Closest.

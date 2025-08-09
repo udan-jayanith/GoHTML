@@ -23,5 +23,4 @@ func TestDecode(t *testing.T) {
 
 	var builder strings.Builder
 	GoHtml.Encode(&builder, node)
-	t.Log(builder.String())
 }

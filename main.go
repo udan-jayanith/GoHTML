@@ -26,7 +26,7 @@ func CreateNode(tagName string) *Node {
 // HTML tags in text get escaped.
 func CreateTextNode(text string) *Node {
 	textNode := CreateNode("")
-	textNode.SetText(escapeHTML(text))
+	textNode.SetText(text)
 	return textNode
 }
 
@@ -69,11 +69,4 @@ func isQuote(chr string) bool {
 func isDigit(value string) bool {
 	reg := regexp.MustCompile(`^[\d\.]+$`)
 	return reg.Match([]byte(value))
-}
-
-func escapeHTML(text string) string {
-	text = strings.ReplaceAll(text, "&", "&amp;")
-	text = strings.ReplaceAll(text, "<", "&lt;")
-	text = strings.ReplaceAll(text, ">", "&gt;")
-	return text
 }

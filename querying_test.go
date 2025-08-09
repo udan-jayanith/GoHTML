@@ -8,6 +8,16 @@ import (
 	GoHtml "github.com/udan-jayanith/GoHTML"
 )
 
+func testFile4NodeTree() (*GoHtml.Node, error) {
+	file, err := os.Open("./test-files/4.html")
+	if err != nil {
+		return nil, err
+	}
+
+	node, err := GoHtml.Decode(file)
+	return node, err
+}
+
 func TestGetElementByID(t *testing.T) {
 	file, err := os.Open("./test-files/3.html")
 	if err != nil {
@@ -33,14 +43,32 @@ func TestGetElementByID(t *testing.T) {
 	}
 }
 
-func testFile4NodeTree() (*GoHtml.Node, error) {
-	file, err := os.Open("./test-files/4.html")
+func TestGetElementByClassName(t *testing.T) {
+	node, err := testFile4NodeTree()
 	if err != nil {
-		return nil, err
+		t.Fatal(err)
 	}
 
-	node, err := GoHtml.Decode(file)
-	return node, err
+	node = node.GetElementByClassName("ordered-item")
+	if node == nil {
+		t.Fatal("Node is nil")
+	}else if node.GetInnerText() != "Apple" {
+		t.Fatal("Expected Apple but got ", node.GetInnerText())
+	}
+}
+
+func TestGetElementByTagName(t *testing.T) {
+	node, err := testFile4NodeTree()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	node = node.GetElementByTagName("h2")
+	if node == nil {
+		t.Fatal("Node is nil")
+	}else if node.GetInnerText() != "List 1"{
+		t.Fatal("Expected List 1 but got ", node.GetInnerText())
+	}
 }
 
 func TestGetElementsByClassName(t *testing.T) {
@@ -109,4 +137,3 @@ func TestGetElementsById(t *testing.T) {
 		}
 	}
 }
-

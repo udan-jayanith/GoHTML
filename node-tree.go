@@ -2,6 +2,7 @@ package GoHtml
 
 import (
 	"strings"
+	"golang.org/x/net/html"
 )
 
 // Node is a struct that represents a html elements. Nodes can have sibling nodes(NextNode and Previous Node) and child node that represent the child elements.
@@ -93,17 +94,13 @@ func (node *Node) SetAttribute(attribute, value string) {
 // HTML tags in returns value get escaped.
 func (node *Node) GetText() string {
 	text := node.text
-	text = strings.ReplaceAll(text, "&amp;", "&")
-	text = strings.ReplaceAll(text, "&lt;", "<")
-	text = strings.ReplaceAll(text, "&gt;", ">")
-
 	return text
 }
 
 // SetText add text to the node.
-// HTML tags get escaped.
+// SetText unescapes entities like "&lt;" to become "<".
 func (node *Node) SetText(text string) {
-	node.text = escapeHTML(text)
+	node.text = html.UnescapeString(text)
 }
 
 // The AppendChild() method of the Node adds a node to the end of the list of children of a specified parent node.
