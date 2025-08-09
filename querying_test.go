@@ -52,7 +52,7 @@ func TestGetElementByClassName(t *testing.T) {
 	node = node.GetElementByClassName("ordered-item")
 	if node == nil {
 		t.Fatal("Node is nil")
-	}else if node.GetInnerText() != "Apple" {
+	} else if node.GetInnerText() != "Apple" {
 		t.Fatal("Expected Apple but got ", node.GetInnerText())
 	}
 }
@@ -66,7 +66,7 @@ func TestGetElementByTagName(t *testing.T) {
 	node = node.GetElementByTagName("h2")
 	if node == nil {
 		t.Fatal("Node is nil")
-	}else if node.GetInnerText() != "List 1"{
+	} else if node.GetInnerText() != "List 1" {
 		t.Fatal("Expected List 1 but got ", node.GetInnerText())
 	}
 }
@@ -134,6 +134,34 @@ func TestGetElementsById(t *testing.T) {
 
 		if node.GetInnerText() != val.(string) {
 			t.Fatal("Unexpected node: ", node.GetInnerText(), val.(string))
+		}
+	}
+}
+
+func TestSelectorTokenizer(t *testing.T) {
+	stack := linkedliststack.New()
+	stack.Push("article .content")
+	stack.Push("article p h1")
+	stack.Push("article p")
+	stack.Push(".title #user")
+	stack.Push("#user title .title-1")
+
+	for stack.Size() > 0 {
+		val, _ := stack.Pop()
+		selector := val.(string)
+
+		tokens := GoHtml.TokenizeSelector(selector)
+		s := ""
+		for _, token := range tokens {
+			if s == "" {
+				s += token.Selector
+			}else{
+				s += " " + token.Selector
+			}
+		}
+
+		if s != selector{
+			t.Fatal("Expected ", selector, "but got", s)
 		}
 	}
 }
