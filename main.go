@@ -8,53 +8,52 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"sync"
 )
 
 var (
 	SyntaxError error = fmt.Errorf("Syntax error")
 )
 
-//CreateNode returns a initialized new node.
+// CreateNode returns a initialized new node.
 func CreateNode(tagName string) *Node {
 	return &Node{
-		tagName: strings.ToLower(strings.TrimSpace(tagName)),
-		rwMutex: sync.Mutex{},
+		tagName:    strings.ToLower(strings.TrimSpace(tagName)),
 		attributes: make(map[string]string),
 	}
 }
 
-//CreateTextNode returns a new node that represents the given text.
-func CreateTextNode(text string) *Node{
+// CreateTextNode returns a new node that represents the given text.
+// HTML tags in text get escaped.
+func CreateTextNode(text string) *Node {
 	textNode := CreateNode("")
 	textNode.SetText(text)
 	return textNode
 }
 
-//DeepCloneNode clones the node without having references to it's original parent node, previous node and next node.
-func DeepCloneNode(node *Node) *Node{
-	node.rwMutex.Lock()
-	attributes := node.attributes
-	node.rwMutex.Unlock()
-
+// DeepCloneNode clones the node without having references to it's original parent node, previous node and next node.
+// If node is nil DeepCloneNode returns nil.
+func DeepCloneNode(node *Node) *Node {
 	if node == nil {
 		return node
 	}
+	attributes := node.attributes
 
 	newNode := Node{
-		childNode: node.GetChildNode(),
-		tagName: node.GetTagName(),
+		childNode:  node.GetChildNode(),
+		tagName:    node.GetTagName(),
 		attributes: attributes,
-		text: node.GetText(),
-
-		rwMutex: sync.Mutex{},
+		text:       node.GetText(),
 	}
 
 	return &newNode
 }
 
-//CloneNode copy the node. But have one way connections to it's parent, next and previous nodes.
-func CloneNode(node *Node) *Node{ 
+// CloneNode copy the node. But have one way connections to it's parent, next and previous nodes.
+// If node is nil CloneNode returns nil.
+func CloneNode(node *Node) *Node {
+	if node == nil {
+		return nil
+	}
 	newNode := DeepCloneNode(node)
 	newNode.setParentNode(node.getParentNode())
 	newNode.SetPreviousNode(node.GetPreviousNode())

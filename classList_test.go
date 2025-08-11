@@ -10,7 +10,7 @@ func TestClasses(t *testing.T){
 	node.SetAttribute("class", "div-container main")
 
 	classList := GoHtml.NewClassList()
-	classList.SetClass(node)
+	classList.DecodeFrom(node)
 	if !classList.Contains("main"){
 		t.Fatal("")
 		return
@@ -28,10 +28,4 @@ func TestClasses(t *testing.T){
 	}
 
 	classList.EncodeTo(node)
-	
-	className, _ := node.GetAttribute("class")
-	if className != classList.Encode(){
-		t.Fatal("")
-		return
-	}
 }

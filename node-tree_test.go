@@ -12,7 +12,7 @@ func TestNodeTree(t *testing.T){
 	bodyEl.AppendChild(GoHtml.CreateNode("h1"))
 	bodyEl.AppendChild(GoHtml.CreateNode("p"))
 
-	traverser := GoHtml.GetTraverser(bodyEl.GetChildNode())
+	traverser := GoHtml.NewTraverser(bodyEl.GetChildNode())
 	for traverser.GetCurrentNode() != nil{
 		traverser.Next()
 	}
@@ -25,7 +25,7 @@ func TestAppend(t *testing.T){
 	}
 
 	count := 1
-	traverser := GoHtml.GetTraverser(h1)
+	traverser := GoHtml.NewTraverser(h1)
 	
 	for traverser.GetCurrentNode() != nil{
 		if traverser.GetCurrentNode().GetTagName() != fmt.Sprintf("h%v", count){

@@ -1,4 +1,3 @@
-![GoHTML logo](https://raw.githubusercontent.com/udan-jayanith/GoHTML/46044619ab943b8ae00301565cc37566d5f2ffa4/assets/media/Black-text%20version.svg)
 # GoHTML
 A powerful and comprehensive HTML parser and DOM manipulation library for Go, bringing JavaScript-like DOM operations to the Go ecosystem.
 
@@ -8,7 +7,7 @@ Run the following command in project directory in order to install.
 go get github.com/udan-jayanith/GoHTML
 ```
 
-Then import like this
+Then GoHTML can import like this.
 ```go
 import (
 	GoHtml "github.com/udan-jayanith/GoHTML"
@@ -18,8 +17,16 @@ import (
 ## Features
  * Parsing
  * Serialization
- * Node tree tarversing
+ * Node tree traversing
  * Querying
+
+## Changelog
+Changes, bug fixes and new features in this version.
+- add: NodeList
+- add: Querying helper functions
+- add: ClassList
+- bug fix: Empty attribute value parsing bug fixed
+- changed: Renamed GetTraverser to NewTraverser
 
 ## Documentation
 Fully fledged [documentation](https://pkg.go.dev/github.com/udan-jayanith/GoHTML) is available at [go.pkg](https://pkg.go.dev/)

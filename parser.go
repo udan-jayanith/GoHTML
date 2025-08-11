@@ -1,284 +1,71 @@
 package GoHtml
 
 import (
-	"bufio"
 	"io"
-	"regexp"
 	"strings"
 
 	"github.com/emirpasic/gods/stacks/linkedliststack"
-)
-
-var(
-	closingTagReg = regexp.MustCompile(`(?s)^\s*<\/.*>\s*$`)
-	openingTagReg =  regexp.MustCompile(`(?s)^\s*<.*>\s*$`)
+	"golang.org/x/net/html"
 )
 
 // Decode reads from rd and create a node-tree. Then returns the root node and an error. If error were to occur it would be SyntaxError.
-func Decode(rd io.Reader) (*Node, error) {
-	newRd := bufio.NewReader(rd)
-	rootNode := CreateNode("")
-	currentNode := rootNode
+func Decode(r io.Reader) (*Node, error) {
+	rootNode := CreateTextNode("")
 	stack := linkedliststack.New()
+	currentNode := rootNode
 
-	str := ""
-	readingQuote := ""
-	readingComment := ""
+	z := html.NewTokenizer(r)
 	for {
-		byt, err := newRd.ReadByte()
-		if err != nil {
-			node := rootNode.GetNextNode()
-			rootNode.RemoveNode()
-			return node, nil
-		}
-		str += string(byt)
-
-		if readingComment == "" && isStartingComment(currentNode, str) && readingQuote == "" {
-			readingComment = getStartingComment(currentNode, str)
-		} else if readingComment != "" && isEndingComment(currentNode, readingComment, str) {
-			readingComment = ""
-			str = escapeComments(str, currentNode)
+		tt := z.Next()
+		if tt == html.ErrorToken {
+			break
 		}
 
-		if readingComment != "" {
+		currentToken := z.Token()
+		if strings.TrimSpace(currentToken.Data) == "" {
 			continue
 		}
 
-		if isQuote(string(byt)) && (currentNode.GetTagName() == "script" || currentNode.GetTagName() == "style" || isReadingTag(str)) &&
-			readingQuote == "" {
-			readingQuote = string(byt)
-			continue
-		} else if readingQuote == string(byt) {
-			readingQuote = ""
-		}
-
-		if readingQuote != "" {
-			continue
-		}
-
-		if closingTagReg.MatchString(str) {
-			//closing tag
-			str = ""
-			currentNode, err = getFirstOpenNode(currentNode, stack)
-			if err != nil {
-				return currentNode, err
+		// token data depend on the token type.
+		switch currentToken.Type {
+		case html.EndTagToken:
+			val, ok := stack.Pop()
+			if !ok || val == nil {
+				continue
 			}
-		} else if openingTagReg.MatchString(str) {
-			node, err := serializeHTMLTag(str)
-			if err != nil {
-				node := rootNode.GetNextNode()
-				rootNode.RemoveNode()
-				return node, err
+			currentNode = val.(*Node)
+		case html.DoctypeToken, html.StartTagToken, html.SelfClosingTagToken, html.TextToken:
+			var node *Node
+			switch currentToken.Type {
+			case html.TextToken:
+				node = CreateTextNode(currentToken.Data)
+			case html.DoctypeToken:
+				node = CreateNode(DOCTYPEDTD)
+				node.SetAttribute(currentToken.Data, "")
+			default:
+				node = CreateNode(currentToken.Data)
+				for _, v := range currentToken.Attr {
+					node.SetAttribute(v.Key, v.Val)
+				}
 			}
-			str = ""
 
-			if isOpen(currentNode, stack) {
+			if isTopNode(currentNode, stack){
 				currentNode.AppendChild(node)
-			} else {
+			}else{
 				currentNode.Append(node)
 			}
-			currentNode = node
-			if !isSelfClosingNode(node) {
-				stack.Push(currentNode)
-			}
-		} else if string(byt) == "<" && strings.TrimSpace(str) != "<" {
-			// text
-			str = str[:len(str)-1]
-			node := serializeTextNode(str)
-			str = "<"
 
-			if isOpen(currentNode, stack) {
-				currentNode.AppendChild(node)
-			} else {
-				currentNode.Append(node)
+			if !node.IsTextNode() && !IsVoidTag(node.GetTagName()){
+				stack.Push(node)
 			}
 			currentNode = node
 		}
 	}
-}
 
-var (
-	startingBlockCommentReg = regexp.MustCompile(`\s*(\/\*)\s*$`)
-	endingBlockCommentReg = regexp.MustCompile(`\s*(\*\/)\s*$`)
-	doubleSlashReg = regexp.MustCompile(`\s*(//)\s*$`)
-	htmlCommentStarterReg = regexp.MustCompile(`\s*(<!--)\s*$`)
-)
+	node := rootNode.GetNextNode()
+	rootNode.RemoveNode()
 
-func isStartingComment(currentNode *Node, str string) bool {
-	if currentNode.GetTagName() == "script" {
-		return doubleSlashReg.MatchString(str) || startingBlockCommentReg.MatchString(str)
-	} else if currentNode.GetTagName() == "style" {
-		return startingBlockCommentReg.MatchString(str)
-	}
-
-	return htmlCommentStarterReg.MatchString(str)
-}
-
-var(
-	endingNewLineReg = regexp.MustCompile(`(\n)\s*$`)
-	htmlCommentEndReg = regexp.MustCompile(`(-->)\s*$`)
-)
-
-func isEndingComment(currentNode *Node, startingComment string, str string) bool {
-	if currentNode.GetTagName() == "script" {
-		return (endingNewLineReg.MatchString(str) && startingComment == "//") || (endingBlockCommentReg.MatchString(str) && startingComment == "/*")
-	} else if currentNode.GetTagName() == "style" {
-		return endingBlockCommentReg.MatchString(str) && startingComment == "/*"
-	}
-
-	return htmlCommentEndReg.MatchString(str) && startingComment == "<!--"
-}
-
-func getStartingComment(currentNode *Node, str string) string {
-	if currentNode.GetTagName() == "script" {
-		if doubleSlashReg.MatchString(str) {
-			return "//"
-		}
-		return getRightMostString(startingBlockCommentReg.FindStringSubmatch(str))
-	} else if currentNode.GetTagName() == "style" {
-		return getRightMostString(startingBlockCommentReg.FindStringSubmatch(str))
-	}
-
-	return getRightMostString(htmlCommentStarterReg.FindStringSubmatch(str))
-}
-
-var(
-	htmlCommentReg = regexp.MustCompile(`(?s)<!--.*-->`)
-	blockCommentReg = regexp.MustCompile(`(?s)\/\*.*\*\/`)
-	inlineCommentReg = regexp.MustCompile(`(?s)\/\/.*\n`)
-)
-
-func escapeComments(str string, currentNode *Node) string{
-	if currentNode.GetTagName() == "script"{
-		str = blockCommentReg.ReplaceAllLiteralString(str, "")
-		str = inlineCommentReg.ReplaceAllLiteralString(str, "")
-	}else if currentNode.GetTagName() == "style"{
-		str = blockCommentReg.ReplaceAllLiteralString(str, "")
-	}else{
-		str = htmlCommentReg.ReplaceAllLiteralString(str, "")
-	}
-	return str
-}
-
-func getFirstOpenNode(currentNode *Node, stack *linkedliststack.Stack) (*Node, error) {
-	traverser := GetTraverser(currentNode)
-	for traverser.GetCurrentNode() != nil {
-		n, ok := stack.Peek()
-		if !ok {
-			return traverser.GetCurrentNode(), SyntaxError
-		}
-		node := n.(*Node)
-
-		if traverser.GetCurrentNode() == node {
-			stack.Pop()
-			return node, nil
-		}
-
-		if traverser.GetCurrentNode().GetPreviousNode() == nil {
-			traverser.SetCurrentNodeTo(traverser.GetCurrentNode().GetParent())
-		} else {
-			traverser.Previous()
-		}
-	}
-
-	return traverser.GetCurrentNode(), SyntaxError
-}
-
-func isOpen(currentNode *Node, stack *linkedliststack.Stack) bool {
-	if stack.Size() < 1 || isSelfClosingNode(currentNode) {
-		return false
-	}
-
-	n, _ := stack.Peek()
-	node := n.(*Node)
-	return node == currentNode
-}
-
-func isSelfClosingNode(node *Node) bool {
-	return node.GetTagName() == "" || IsVoidTag(node.GetTagName())
-}
-
-var (
-	tagNameRegex          = regexp.MustCompile(`^\s*([\w\-_!]*)`)
-	afterTagNameReg       = regexp.MustCompile(`^\s*[\w\-_!]*\s*(.*)`)
-	attributeNameReg      = regexp.MustCompile(`^\s*([\w\-_!]*)\s*`)
-	afterAttributeNameReg = regexp.MustCompile(`^\s*[\w\-_!]*\s*(.*)`)
-	isDefinedValueReg     = regexp.MustCompile(`(?s)^\s*=.*`)
-	afterEqualSignReg     = regexp.MustCompile(`(?s)^\s*=(.*)`)
-	definedValueReg       = regexp.MustCompile(`(?s)\s*(\s*('.*?'|".*?"|\s*[\S]*).*).*`)
-	afterDefinedValueReg  = regexp.MustCompile(`(?s)\s*('.*?'|".*?"|\s*[\S]*)\s*(.*)\s*`)
-)
-
-func serializeHTMLTag(tag string) (*Node, error) {
-	tag = strings.TrimSpace(tag)
-	tag = strings.TrimRight(strings.TrimRight(strings.TrimLeft(tag, "<"), ">"), `/`)
-	node := CreateNode("")
-
-	//extract the html tag name
-	tagName := tagNameRegex.FindString(tag)
-	if tagName == "" {
-		return node, SyntaxError
-	}
-	node.SetTagName(strings.TrimSpace(tagName))
-
-	//Cut the tag name from tag.
-	tag = strings.TrimSpace(getRightMostString(afterTagNameReg.FindStringSubmatch(tag)))
-	if strings.TrimSpace(tag) == "" || tag == strings.TrimSpace(tagName) {
-		return node, nil
-	}
-
-	for {
-		if tag == "" {
-			return node, nil
-		}
-
-		//This parses attribute name.
-		attributeName := strings.TrimSpace(getRightMostString(attributeNameReg.FindStringSubmatch(tag)))
-		if attributeName == "" {
-			return node, SyntaxError
-		}
-
-		//This removes attribute name from the tag.
-		tag = strings.TrimSpace(getRightMostString(afterAttributeNameReg.FindStringSubmatch(tag)))
-		if tag == "" {
-			return node, nil
-		}
-
-		if !isDefinedValueReg.MatchString(tag) {
-			node.SetAttribute(attributeName, "")
-			if attributeName == strings.TrimSpace(tag){
-				return node, nil
-			}
-			continue
-		}
-
-		tag = strings.TrimSpace(getRightMostString(afterEqualSignReg.FindStringSubmatch(tag)))
-		if tag == "" {
-			return node, SyntaxError
-		}
-
-		attributeValue := strings.TrimSpace(getRightMostString(definedValueReg.FindStringSubmatch(tag)))
-		node.SetAttribute(attributeName, escapeQuotes(attributeValue))
-
-		tag = strings.TrimSpace(getRightMostString(afterDefinedValueReg.FindStringSubmatch(tag)))
-		if tag == "" || attributeValue == tag{
-			return node, nil
-		}
-
-	}
-}
-
-func serializeTextNode(s string) *Node {
-	node := CreateTextNode(s)
-	return node
-}
-
-var (
-	firstCharLesserReg *regexp.Regexp = regexp.MustCompile(`^<.*`)
-)
-
-func isReadingTag(strBuf string) bool {
-	return firstCharLesserReg.MatchString(strBuf)
+	return node, nil
 }
 
 // HTMLToNodeTree return html code as a node-tree. If error were to occur it would be SyntaxError.
@@ -288,25 +75,12 @@ func HTMLToNodeTree(html string) (*Node, error) {
 	return node, err
 }
 
-var (
-	escapeQuotesReg *regexp.Regexp = regexp.MustCompile(`(?s)^\s*('(.*)'|"(.*)"|([\d+\.]*)|.*)\s*$`)
-)
-
-func escapeQuotes(str string) string {
-	matches := escapeQuotesReg.FindStringSubmatch(str)
-	for i := len(matches) - 1; i >= 0; i-- {
-		if strings.TrimSpace(matches[i]) != "" {
-			return matches[i]
-		}
+func isTopNode(node *Node, stack *linkedliststack.Stack) bool {
+	val, ok := stack.Peek()
+	if !ok || val == nil {
+		return false
 	}
-	return ""
-}
 
-func getRightMostString(slice []string) string {
-	for i := len(slice) - 1; i >= 0; i-- {
-		if strings.TrimSpace(slice[i]) != "" {
-			return slice[i]
-		}
-	}
-	return ""
+	topNode := val.(*Node)
+	return topNode == node
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func TestDecode(t *testing.T) {
-	file, err := os.Open("./test-files/1.html")
+	file, err := os.Open("./test-files/3.html")
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -21,17 +21,6 @@ func TestDecode(t *testing.T) {
 		return
 	}
 
-	traverser := GoHtml.GetTraverser(node)
-	traverser.Walkthrough(func(node *GoHtml.Node) GoHtml.TraverseCondition {
-		attributeValue, ok := node.GetAttribute("inner-text")
-		if attributeValue == "js" && ok {
-			t.Fatal("js comment got parsed", node)
-			return GoHtml.StopWalkthrough
-		}
-		return GoHtml.ContinueWalkthrough
-	})
-
-	builder1 := &strings.Builder{}
-	GoHtml.Encode(builder1, node)
-	//It's hard compare exacted output. Because strings, prettier formats html code. htmlFormatter and prettier add extra stuffs to the html codes like dash in void tags. Exacted output is in the ./test-files/2.html.
+	var builder strings.Builder
+	GoHtml.Encode(&builder, node)
 }

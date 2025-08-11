@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/emirpasic/gods/stacks/linkedliststack"
+	"golang.org/x/net/html"
 )
 
 func wrapAttributeValue(value string) string {
@@ -19,11 +20,12 @@ func wrapAttributeValue(value string) string {
 func encodeListAttributes(node *Node) string {
 	w := strings.Builder{}
 	node.IterateAttributes(func(attribute, value string) {
-		if strings.TrimSpace(value) == "" {
+		if strings.TrimSpace(attribute) == "" {
 			w.Write(fmt.Appendf(nil, " %s", attribute))
 		} else {
 			w.Write(fmt.Appendf(nil, " %s=%s", attribute, wrapAttributeValue(value)))
 		}
+
 	})
 	return w.String()
 }
@@ -34,6 +36,19 @@ func Encode(w io.Writer, rootNode *Node) {
 		node      *Node
 		openedTag bool
 	}
+
+	/*
+	traverser := NewTraverser(rootNode)
+	traverser.Walkthrough(func(node *Node) TraverseCondition {
+		fmt.Println("+++++++++++++++++++++++++++")
+		if node.IsTextNode() {
+			fmt.Println(node.text)
+		} else {
+			fmt.Println(node.GetTagName())
+		}
+		return ContinueWalkthrough
+	})
+	*/
 
 	stack := linkedliststack.New()
 	stack.Push(stackFrame{node: rootNode, openedTag: false})
@@ -49,7 +64,7 @@ func Encode(w io.Writer, rootNode *Node) {
 
 		tagName := current.GetTagName()
 		if tagName == "" {
-			w.Write([]byte(current.GetText()))
+			w.Write([]byte(html.EscapeString(current.GetText())))
 		} else if IsVoidTag(tagName) {
 			fmt.Fprintf(w, "<%s%s>", tagName, encodeListAttributes(current))
 			if current.GetNextNode() != nil {
