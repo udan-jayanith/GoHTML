@@ -8,6 +8,5 @@
 * GetElementsByClassName
 * GetElementsByTagName
 * GetElementsById
-* QueryList
 * QuerySelector
 * QuerySelectorAll

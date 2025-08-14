@@ -42,15 +42,16 @@ func (t *Traverser) Previous() *Node {
 	return t.GetCurrentNode()
 }
 
-type TraverseCondition bool
+type TraverseCondition = bool
 
 const (
-	StopWalkthrough     TraverseCondition = true
-	ContinueWalkthrough TraverseCondition = false
+	StopWalkthrough     TraverseCondition = false
+	ContinueWalkthrough TraverseCondition = true
 )
 
-// Walkthrough traverse the node tree from the current node to the end of the node tree by visiting every node. If callback returned StopWalkthrough walkthrough function will stop else if it returned ContinueWalkthrough it advanced to the next node.
-// Walkthrough calls callback at every node and pass that node. Walkthrough traverse the node tree similar to DFS without visiting visited nodes iteratively.
+// Walkthrough traverse the node tree from the current node to the end of the node tree by visiting every node.
+// Walkthrough traverse the node tree similar to DFS without visiting visited nodes iteratively.
+// Walkthrough can be used as a range over iterator or a function that takes a callback and pass every node one by one.
 func (t *Traverser) Walkthrough(callback func(node *Node) TraverseCondition) {
 	stack := linkedliststack.New()
 	if t.GetCurrentNode() == nil {
@@ -60,7 +61,7 @@ func (t *Traverser) Walkthrough(callback func(node *Node) TraverseCondition) {
 
 	for stack.Size() > 0 {
 		currentNode, _ := stack.Pop()
-		if callback(currentNode.(*Node)) == StopWalkthrough {
+		if !callback(currentNode.(*Node)) {
 			return
 		}
 
