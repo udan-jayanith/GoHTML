@@ -12,6 +12,7 @@ func TestFetchPostCovers(t *testing.T){
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer res.Body.Close()
 
 	tim := time.Now()
 	node, err := GoHtml.Decode(res.Body)

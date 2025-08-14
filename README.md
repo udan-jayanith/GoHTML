@@ -32,6 +32,7 @@ Heres an example of fetching a website and parsing and then using querying metho
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer res.Body.Close()
 
 	//Parses the given html reader and then returns the root node and an error.
 	node, err := GoHtml.Decode(res.Body)
