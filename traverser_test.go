@@ -19,7 +19,7 @@ func TestWalkthrough(t *testing.T) {
 	traverser := GoHtml.NewTraverser(body)
 
 	resList := make([]*GoHtml.Node, 0)
-	traverser.Walkthrough(func(node *GoHtml.Node) GoHtml.TraverseCondition {
+	traverser.Walkthrough(func(node *GoHtml.Node) bool {
 		resList = append(resList, node)
 		return GoHtml.ContinueWalkthrough
 	})

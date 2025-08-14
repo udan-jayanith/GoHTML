@@ -150,18 +150,45 @@ func TestSelectorTokenizer(t *testing.T) {
 		val, _ := stack.Pop()
 		selector := val.(string)
 
-		tokens := GoHtml.TokenizeSelector(selector)
+		tokens := GoHtml.TokenizeQuery(selector)
 		s := ""
 		for _, token := range tokens {
 			if s == "" {
 				s += token.Selector
-			}else{
+			} else {
 				s += " " + token.Selector
 			}
 		}
 
-		if s != selector{
+		if s != selector {
 			t.Fatal("Expected ", selector, "but got", s)
 		}
+	}
+}
+
+func TestQuerySelector(t *testing.T) {
+	node, err := testFile4NodeTree()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	imgEl := node.QuerySelector("img #idElement")
+	imgSrc, _ := imgEl.GetAttribute("src")
+	imgAlt, _ := imgEl.GetAttribute("alt")
+	if imgSrc != "" || imgAlt != "" {
+		t.Fatal("")
+	}
+}
+
+func TestQuerySelectorAll(t *testing.T) {
+	node, err := testFile4NodeTree()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	nodeList := node.QuerySelectorAll("h2")
+	if nodeList.Len() != 2{
+		t.Fatal("")
 	}
 }

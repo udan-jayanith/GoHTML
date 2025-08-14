@@ -68,13 +68,14 @@ func (node *Node) SetTagName(tagName string) {
 
 // GetAttribute returns the specified attribute value form the node. If the specified attribute doesn't exists GetAttribute returns a empty string and false.
 func (node *Node) GetAttribute(attributeName string) (string, bool) {
-	v, ok := node.attributes[attributeName]
+	v, ok := node.attributes[strings.TrimSpace(strings.ToLower(attributeName))]
 	return v, ok
 }
 
 // RemoveAttribute remove or delete the specified attribute.
 func (node *Node) RemoveAttribute(attributeName string) {
-	delete(node.attributes, attributeName)
+	delete(node.attributes, strings.TrimSpace(strings.ToLower(attributeName)))
+	
 }
 
 // IterateAttributes calls callback at every attribute in the node by passing attribute and value of the node.
@@ -87,7 +88,7 @@ func (node *Node) IterateAttributes(callback func(attribute, value string)) {
 
 // SetAttribute add a attribute to the node.
 func (node *Node) SetAttribute(attribute, value string) {
-	node.attributes[strings.TrimSpace(attribute)] = strings.TrimSpace(value)
+	node.attributes[strings.ToLower(strings.TrimSpace(attribute))] = strings.TrimSpace(value)
 }
 
 // GetText returns text on the node. This does not returns text on it's child nodes. If you also wants child nodes text use GetInnerText method on the node.

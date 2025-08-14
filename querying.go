@@ -106,24 +106,24 @@ const (
 	Class
 )
 
-// SelectorToken store data about basic css selectors(ids, classes, tags).
-type SelectorToken struct {
+// QueryToken store data about basic css selectors(ids, classes, tags).
+type QueryToken struct {
 	Type         int
 	SelectorName string
 	Selector     string
 }
 
-// TokenizeSelector returns a []SelectorToken in selector.
-func TokenizeSelector(selector string) []SelectorToken {
-	slice := make([]SelectorToken, 0, 1)
-	if strings.TrimSpace(selector) == "" {
+// TokenizeQuery tokenizes the query and returns a list of QueryToken.
+func TokenizeQuery(query string) []QueryToken {
+	slice := make([]QueryToken, 0, 1)
+	if strings.TrimSpace(query) == "" {
 		return slice
 	}
 
-	iter := strings.SplitSeq(selector, " ")
+	iter := strings.SplitSeq(query, " ")
 	for sec := range iter {
-		token := SelectorToken{}
-		switch sec{
+		token := QueryToken{}
+		switch sec {
 		case "", " ", ".", "#":
 			continue
 		}
@@ -146,3 +146,58 @@ func TokenizeSelector(selector string) []SelectorToken {
 	return slice
 }
 
+func matchQueryTokens(node *Node, queryTokens []QueryToken) bool {
+	if len(queryTokens) == 0 {
+		return false
+	}
+	classList := NewClassList()
+	classList.DecodeFrom(node)
+	for _, token := range queryTokens {
+		switch token.Type {
+		case Id:
+			idName, _ := node.GetAttribute("id")
+			if token.SelectorName != idName {
+				return false
+			}
+		case Tag:
+			if node.GetTagName() != token.SelectorName {
+				return false
+			}
+		case Class:
+			if !classList.Contains(token.SelectorName) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// QuerySelector returns the first node that matches with the give node.
+func (node *Node) QuerySelector(query string) *Node {
+	queryTokens := TokenizeQuery(query)
+
+	traverser := NewTraverser(node)
+	var res *Node
+	traverser.Walkthrough(func(node *Node) TraverseCondition {
+		if matchQueryTokens(node, queryTokens) {
+			res = node
+			return StopWalkthrough
+		}
+		return ContinueWalkthrough
+	})
+	return res
+}
+
+// QuerySelectorAll returns a NodeList containing nodes that matched with the given query.
+func (node *Node) QuerySelectorAll(query string) NodeList{
+	nodeList := NewNodeList()
+	queryTokens := TokenizeQuery(query)
+	traverser := NewTraverser(node)
+
+	for node := range traverser.Walkthrough{
+		if matchQueryTokens(node, queryTokens) {
+			nodeList.Append(node)
+		}
+	}
+	return nodeList
+}
