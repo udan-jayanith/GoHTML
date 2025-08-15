@@ -1,6 +1,7 @@
 # GoHTML
 
 A powerful and comprehensive HTML parser and DOM manipulation library for Go, bringing JavaScript-like DOM operations to the Go ecosystem.
+Note: GoHTML only support UTF-8. It's users responsibility to make sure input is UTF-8.
 
 ## Installation
 
@@ -50,12 +51,10 @@ Heres an example of fetching a website and parsing and then using querying metho
 ## Changelog
 
 Changes, bug fixes and new features in this version.
-
-- add: NodeList
-- add: Querying helper functions
-- add: ClassList
-- bug fix: Empty attribute value parsing bug fixed
-- changed: Renamed GetTraverser to NewTraverser
+- add: Tokenizer
+- add: NodeTreeBuilder
+- renamed: QuerySelector to Query
+- renamed: QuerySelectorAll to QueryAll
 
 ## Documentation
 
