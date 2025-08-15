@@ -172,8 +172,8 @@ func matchQueryTokens(node *Node, queryTokens []QueryToken) bool {
 	return true
 }
 
-// QuerySelector returns the first node that matches with the give node.
-func (node *Node) QuerySelector(query string) *Node {
+// Query returns the first node that matches with the give query.
+func (node *Node) Query(query string) *Node {
 	queryTokens := TokenizeQuery(query)
 
 	traverser := NewTraverser(node)
@@ -188,8 +188,8 @@ func (node *Node) QuerySelector(query string) *Node {
 	return res
 }
 
-// QuerySelectorAll returns a NodeList containing nodes that matched with the given query.
-func (node *Node) QuerySelectorAll(query string) NodeList{
+// QueryAll returns a NodeList containing nodes that matched with the given query.
+func (node *Node) QueryAll(query string) NodeList{
 	nodeList := NewNodeList()
 	queryTokens := TokenizeQuery(query)
 	traverser := NewTraverser(node)

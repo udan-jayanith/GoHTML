@@ -1,6 +1,5 @@
 /*
-A powerful and comprehensive HTML parser and DOM manipulation library for Go,
-bringing JavaScript-like DOM operations to the Go ecosystem.
+A HTML parse and a serializer for Go. GoHTML tries to keep semantic similar to JS-DOM API while trying to keep the API simple by not forcing JS-DOM model into GoHTML. Because of this GoHTML has node tree model. GoHTML tokenizer uses std net/html module for tokenizing in underlining layer. There for it's users responsibility to make sure inputs to GoHTML is UTF-8 encoded. GoHTML allows direct access to the node tree.
 */
 package GoHtml
 

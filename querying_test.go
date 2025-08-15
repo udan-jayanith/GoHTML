@@ -172,7 +172,7 @@ func TestQuerySelector(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	imgEl := node.QuerySelector("img #idElement")
+	imgEl := node.Query("img #idElement")
 	imgSrc, _ := imgEl.GetAttribute("src")
 	imgAlt, _ := imgEl.GetAttribute("alt")
 	if imgSrc != "" || imgAlt != "" {
@@ -187,7 +187,7 @@ func TestQuerySelectorAll(t *testing.T) {
 		return
 	}
 
-	nodeList := node.QuerySelectorAll("h2")
+	nodeList := node.QueryAll("h2")
 	if nodeList.Len() != 2{
 		t.Fatal("")
 	}

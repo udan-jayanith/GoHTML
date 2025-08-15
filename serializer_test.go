@@ -3,10 +3,11 @@ package GoHtml_test
 import (
 	"strings"
 	"testing"
+	"os"
 	GoHtml "github.com/udan-jayanith/GoHTML"
 )
 
-func TestEncode(t *testing.T) {
+func TestEncode1(t *testing.T) {
 	body := GoHtml.CreateNode("body")
 	h1 := GoHtml.CreateNode("h1")
 	h1.AppendText("This is a heading")
@@ -19,5 +20,16 @@ func TestEncode(t *testing.T) {
 
 	builder1 := &strings.Builder{}
 	GoHtml.Encode(builder1, body)
+	//It's hard compare exacted output. Because strings, prettier formats html code. htmlFormatter and prettier add extra stuffs to the html codes like dash in void tags. Exacted output is in the ./test-files/2.html.
+}
+
+func TestEncode2(t *testing.T) {
+	file, err := os.Open("./test-files/1.html")
+	if err != nil {
+		t.Fatal("1.html does not exists.")
+	}
+	node, _  := GoHtml.Decode(file)
+	var builder strings.Builder
+	GoHtml.Encode(&builder, node)
 	//It's hard compare exacted output. Because strings, prettier formats html code. htmlFormatter and prettier add extra stuffs to the html codes like dash in void tags. Exacted output is in the ./test-files/2.html.
 }
