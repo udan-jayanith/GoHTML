@@ -8,71 +8,106 @@ import (
 	"golang.org/x/net/html"
 )
 
-// Decode reads from rd and create a node-tree. Then returns the root node and an error. If error were to occur it would be SyntaxError.
-func Decode(r io.Reader) (*Node, error) {
-	rootNode := CreateTextNode("")
-	stack := linkedliststack.New()
-	currentNode := rootNode
-
-	z := html.NewTokenizer(r)
-	for {
-		tt := z.Next()
-		if tt == html.ErrorToken {
-			break
-		}
-
-		currentToken := z.Token()
-		if strings.TrimSpace(currentToken.Data) == "" {
-			continue
-		}
-
-		// token data depend on the token type.
-		switch currentToken.Type {
-		case html.EndTagToken:
-			val, ok := stack.Pop()
-			if !ok || val == nil {
-				continue
-			}
-			currentNode = val.(*Node)
-		case html.DoctypeToken, html.StartTagToken, html.SelfClosingTagToken, html.TextToken:
-			var node *Node
-			switch currentToken.Type {
-			case html.TextToken:
-				node = CreateTextNode(currentToken.Data)
-			case html.DoctypeToken:
-				node = CreateNode(DOCTYPEDTD)
-				node.SetAttribute(currentToken.Data, "")
-			default:
-				node = CreateNode(currentToken.Data)
-				for _, v := range currentToken.Attr {
-					node.SetAttribute(v.Key, v.Val)
-				}
-			}
-
-			if isTopNode(currentNode, stack){
-				currentNode.AppendChild(node)
-			}else{
-				currentNode.Append(node)
-			}
-
-			if !node.IsTextNode() && !IsVoidTag(node.GetTagName()){
-				stack.Push(node)
-			}
-			currentNode = node
-		}
-	}
-
-	node := rootNode.GetNextNode()
-	rootNode.RemoveNode()
-
-	return node, nil
+// Tokenizer contains a *html.Tokenizer.
+type Tokenizer struct {
+	z *html.Tokenizer
 }
 
-// HTMLToNodeTree return html code as a node-tree. If error were to occur it would be SyntaxError.
-func HTMLToNodeTree(html string) (*Node, error) {
-	rd := strings.NewReader(html)
-	node, err := Decode(rd)
-	return node, err
+// NewTokenizer returns a new Tokenizer.
+func NewTokenizer(r io.Reader) Tokenizer {
+	return Tokenizer{
+		z: html.NewTokenizer(r),
+	}
+}
+
+// Advanced scans the next token and returns its type.
+func (t *Tokenizer) Advanced() html.TokenType {
+	return t.z.Next()
+}
+
+// CurrentNode returns the current node.
+func (t *Tokenizer) CurrentNode() *Node {
+	currentToken := t.z.Token()
+	if strings.TrimSpace(currentToken.Data) == "" {
+		return nil
+	}
+
+	// token data depend on the token type.
+	switch currentToken.Type {
+	case html.DoctypeToken, html.StartTagToken, html.SelfClosingTagToken, html.TextToken:
+		var node *Node
+		switch currentToken.Type {
+		case html.TextToken:
+			node = CreateTextNode(currentToken.Data)
+		case html.DoctypeToken:
+			node = CreateNode(DOCTYPEDTD)
+			node.SetAttribute(currentToken.Data, "")
+		default:
+			node = CreateNode(currentToken.Data)
+			for _, v := range currentToken.Attr {
+				node.SetAttribute(v.Key, v.Val)
+			}
+		}
+		return node
+	}
+	return nil
+}
+
+// NodeTreeBuilder is used to build a node tree given a node and it's type.
+type NodeTreeBuilder struct {
+	rootNode    *Node
+	stack       *linkedliststack.Stack
+	currentNode *Node
+}
+
+// NewNodeTreeBuilder returns a new NodeTreeBuilder.
+func NewNodeTreeBuilder() NodeTreeBuilder {
+	rootNode := CreateTextNode("")
+	return NodeTreeBuilder{
+		rootNode:    rootNode,
+		currentNode: rootNode,
+		stack:       linkedliststack.New(),
+	}
+}
+
+// WriteNodeTree append the node given html.TokenType
+func (ntb *NodeTreeBuilder) WriteNodeTree(node *Node, tt html.TokenType) {
+	switch tt {
+	case html.EndTagToken:
+		val, ok := ntb.stack.Pop()
+		if !ok || val == nil {
+			return
+		}
+		ntb.currentNode = val.(*Node)
+	case html.DoctypeToken, html.StartTagToken, html.SelfClosingTagToken, html.TextToken:
+		if node == nil {
+			return
+		}
+		
+		if isTopNode(ntb.currentNode, ntb.stack) {
+			ntb.currentNode.AppendChild(node)
+		} else {
+			ntb.currentNode.Append(node)
+		}
+
+		if !node.IsTextNode() && !IsVoidTag(node.GetTagName()) {
+			ntb.stack.Push(node)
+		}
+		ntb.currentNode = node
+	}
+}
+
+// GetRootNode returns the root node of the accumulated node tree and resets the NodeTreeBuilder.
+func (ntb *NodeTreeBuilder) GetRootNode() *Node {
+	node := ntb.rootNode.GetNextNode()
+	ntb.rootNode.RemoveNode()
+
+	rootNode := CreateTextNode("")
+	ntb.rootNode = rootNode
+	ntb.currentNode = rootNode
+	ntb.stack = linkedliststack.New()
+
+	return node
 }
 
 func isTopNode(node *Node, stack *linkedliststack.Stack) bool {
@@ -83,4 +118,26 @@ func isTopNode(node *Node, stack *linkedliststack.Stack) bool {
 
 	topNode := val.(*Node)
 	return topNode == node
+}
+
+// Decode reads from rd and create a node-tree. Then returns the root node and nil.
+func Decode(r io.Reader) (*Node, error) {
+	t := NewTokenizer(r)
+	nodeTreeBuilder := NewNodeTreeBuilder()
+	for {
+		tt := t.Advanced()
+		if tt == html.ErrorToken{
+			break
+		}
+
+		nodeTreeBuilder.WriteNodeTree(t.CurrentNode(), tt)
+	}
+	return nodeTreeBuilder.GetRootNode(), nil
+}
+
+// HTMLToNodeTree return html code as a node-tree. If error were to occur it would be SyntaxError.
+func HTMLToNodeTree(html string) (*Node, error) {
+	rd := strings.NewReader(html)
+	node, err := Decode(rd)
+	return node, err
 }
