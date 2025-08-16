@@ -205,7 +205,16 @@ func (node *Node) IsTextNode() bool {
 	return node.GetTagName() == ""
 }
 
-// Closest traverses the node tree and its parents (heading toward the root node) until it finds a node that matches the specified query.
+// Closest traverses the node tree and its parents (heading toward the root node) until it finds a node that matches the full query.
+/*
+Ex:
+query = "div .video-container #div"
+
+<div class="video-container id="div"></div>
+
+As shown elements with every described specifiers will only match.
+But this is not the case for QuerySearch, QuerySelector and QuerySelectorAll.
+*/
 // Adapted from [https://developer.mozilla.org/en-US/docs/Web/API/Element/closest](MDN Element: closest() method)
 func (node *Node) Closest(query string) *Node {
 	queryTokens := TokenizeQuery(query)

@@ -136,7 +136,12 @@ type QueryToken struct {
 	Selector     string
 }
 
-// TokenizeQuery tokenizes the query and returns a list of QueryToken.
+ /*
+TokenizeQuery tokenizes the query and returns a list of QueryToken.
+
+query should be of only consists of class, tag and/or id. This applies to every function that accepts a parameter name query.
+query should not consists of css selectors, Combinators and separators.
+*/
 func TokenizeQuery(query string) []QueryToken {
 	slice := make([]QueryToken, 0, 1)
 	if strings.TrimSpace(query) == "" {

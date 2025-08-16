@@ -132,6 +132,9 @@ func (node *Node) QueryAll(query string) NodeList {
 	return nodeList
 }
 
+/*
+QuerySearch tokenizes the query string and search for nodes that matches with the right most query token. After matching right most query it proceeds to match nodes parents nodes for left over tokens and then passed that node to (yield/range). QuerySearch search the whole node tree for matches unless yield get canceled or range iterator get cancel. 
+*/
 func QuerySearch(node *Node, query string) iter.Seq[*Node] {
 	return func(yield func(node *Node) bool) {
 		queryTokens := TokenizeQuery(query)
@@ -232,10 +235,22 @@ outer:
 	return i
 }
 
+//QuerySelector only returns the first node that matches with the QuerySearch.
 func (node *Node) QuerySelector(query string) *Node {
 	iter := QuerySearch(node, query)
 	for node := range iter{
 		return node
 	}
 	return nil
+}
+
+//QuerySelectorAll stores nodes passed down by QuerySearch in a nodeList and returns the nodeList.
+func (node *Node) QuerySelectorAll(query string) NodeList{
+	iter := QuerySearch(node, query)
+	nodeList := NewNodeList()
+	
+	for node := range iter{
+		nodeList.Append(node)
+	}
+	return nodeList
 }
