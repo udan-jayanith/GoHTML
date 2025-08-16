@@ -146,6 +146,7 @@ func TokenizeQuery(query string) []QueryToken {
 	return slice
 }
 
+// matchQueryTokens returns wether the queryTokens match given the node. 
 func matchQueryTokens(node *Node, queryTokens []QueryToken) bool {
 	if len(queryTokens) == 0 {
 		return false

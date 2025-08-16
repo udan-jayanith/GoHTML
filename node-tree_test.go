@@ -113,3 +113,23 @@ func TestRemoveNode(t *testing.T){
 	//p.RemoveNode()
 	//t.Log(GoHtml.NodeTreeToHTML(article))
 }
+
+func TestClosest(t *testing.T){
+	node, err := testFile4NodeTree()
+	if err != nil{
+		t.Fatal(err)
+	}
+	node = node.GetElementByClassName("ordered-item")
+	if node == nil {
+		t.Fatal("Node is nil.")
+	}
+
+	node = node.Closest("ol .ordered-list")
+	if node == nil {
+		t.Fatal("Node is nil")
+	}else if node.GetTagName() != "ol"{
+		t.Fatal("Unexpected element.")
+	}
+
+
+}

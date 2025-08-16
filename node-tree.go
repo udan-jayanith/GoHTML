@@ -2,6 +2,7 @@ package GoHtml
 
 import (
 	"strings"
+
 	"golang.org/x/net/html"
 )
 
@@ -75,7 +76,7 @@ func (node *Node) GetAttribute(attributeName string) (string, bool) {
 // RemoveAttribute remove or delete the specified attribute.
 func (node *Node) RemoveAttribute(attributeName string) {
 	delete(node.attributes, strings.TrimSpace(strings.ToLower(attributeName)))
-	
+
 }
 
 // IterateAttributes calls callback at every attribute in the node by passing attribute and value of the node.
@@ -202,4 +203,23 @@ func (node *Node) RemoveNode() {
 // IsTextNode returns a boolean value indicating node is a text node or not.
 func (node *Node) IsTextNode() bool {
 	return node.GetTagName() == ""
+}
+
+// Closest traverses the node tree and its parents (heading toward the root node) until it finds a node that matches the specified query.
+// Adapted from [https://developer.mozilla.org/en-US/docs/Web/API/Element/closest](MDN Element: closest() method)
+func (node *Node) Closest(query string) *Node {
+	queryTokens := TokenizeQuery(query)
+	traverser := NewTraverser(node)
+	for traverser.GetCurrentNode() != nil {
+		if matchQueryTokens(traverser.GetCurrentNode(), queryTokens) {
+			break
+		}
+
+		if traverser.GetCurrentNode().GetPreviousNode() == nil {
+			traverser.SetCurrentNodeTo(traverser.GetCurrentNode().GetParent())
+		}else{
+			traverser.Previous()
+		}
+	}
+	return traverser.GetCurrentNode()
 }
