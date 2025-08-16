@@ -199,7 +199,7 @@ func TestQuerySelector(t *testing.T){
 		t.Fatal(err)
 		return
 	}
-	node = node.QuerySelector(".ordered-list li .ordered-item")
+	node = node.QuerySelector("html .ordered-list ol li .ordered-item")
 	if node == nil {
 		t.Fatal("Node is nill after QuerySelector")
 	}

@@ -1,7 +1,7 @@
 package GoHtml
 
 import (
-	"fmt"
+	"iter"
 	"strings"
 
 	"github.com/emirpasic/gods/stacks/linkedliststack"
@@ -132,63 +132,62 @@ func (node *Node) QueryAll(query string) NodeList {
 	return nodeList
 }
 
-func (node *Node) QuerySelector(query string) *Node {
-	queryTokens := TokenizeQuery(query)
+func QuerySearch(node *Node, query string) iter.Seq[*Node] {
+	return func(yield func(node *Node) bool) {
+		queryTokens := TokenizeQuery(query)
 
-	parentNodeStack := make([]*Node, 0, 2)
-	stack := linkedliststack.New()
-	type stackFrame struct {
-		//len should contain the length of the parentNodeStack at the stack push time.
-		len  int
-		node *Node
-	}
-	stack.Push(stackFrame{
-		len:  len(parentNodeStack),
-		node: node,
-	})
-
-	for stack.Size() > 0 {
-		val, _ := stack.Pop()
-		sf := val.(stackFrame)
-
-		for diff := len(parentNodeStack) - sf.len; len(parentNodeStack) > 0 && diff > 0; diff-- {
-			_, parentNodeStack = pop(parentNodeStack)
+		parentNodeStack := make([]*Node, 0, 2)
+		stack := linkedliststack.New()
+		type stackFrame struct {
+			//len should contain the length of the parentNodeStack at the stack push time.
+			len  int
+			node *Node
 		}
+		stack.Push(stackFrame{
+			len:  len(parentNodeStack),
+			node: node,
+		})
 
-		classList := NewClassList()
-		classList.DecodeFrom(sf.node)
-		i := matchFromRightMostQueryToken(sf.node, classList, queryTokens, len(queryTokens)-1)
-		if i < len(queryTokens)-1 {
-			fmt.Println(sf.node)
-			for j := len(parentNodeStack) - 1; j >= 0 && i >= 0; j-- {
-				node := parentNodeStack[j]
-				classList := NewClassList()
-				classList.DecodeFrom(node)
-				i = matchFromRightMostQueryToken(node, classList, queryTokens, i-1)
-				fmt.Println(node, i)
+		for stack.Size() > 0 {
+			val, _ := stack.Pop()
+			sf := val.(stackFrame)
+
+			for diff := len(parentNodeStack) - sf.len; len(parentNodeStack) > 0 && diff > 0; diff-- {
+				_, parentNodeStack = pop(parentNodeStack)
 			}
-			if i <= 0{
-				return sf.node
+
+			classList := NewClassList()
+			classList.DecodeFrom(sf.node)
+			i := matchFromRightMostQueryToken(sf.node, classList, queryTokens, len(queryTokens)-1)
+			if i < len(queryTokens)-1 {
+				for j := len(parentNodeStack) - 1; j >= 0 && i >= 0; j-- {
+					node := parentNodeStack[j]
+					classList := NewClassList()
+					classList.DecodeFrom(node)
+					i = matchFromRightMostQueryToken(node, classList, queryTokens, i-1)
+				}
+				if i < 0 && !yield(sf.node){
+					return
+				}
+			}
+
+			if sf.node.GetNextNode() != nil {
+				stack.Push(stackFrame{
+					len:  len(parentNodeStack),
+					node: sf.node.GetNextNode(),
+				})
+			}
+
+			if sf.node.GetChildNode() != nil {
+				childNode := sf.node.GetChildNode()
+				parentNodeStack = append(parentNodeStack, childNode)
+				stack.Push(stackFrame{
+					len:  len(parentNodeStack),
+					node: childNode,
+				})
 			}
 		}
-
-		if sf.node.GetNextNode() != nil {
-			stack.Push(stackFrame{
-				len:  len(parentNodeStack),
-				node: sf.node.GetNextNode(),
-			})
-		}
-
-		if sf.node.GetChildNode() != nil {
-			childNode := sf.node.GetChildNode()
-			parentNodeStack = append(parentNodeStack, childNode)
-			stack.Push(stackFrame{
-				len:  len(parentNodeStack),
-				node: childNode,
-			})
-		}
 	}
-	return nil
 }
 
 func pop(slice []*Node) (*Node, []*Node) {
@@ -202,8 +201,17 @@ func pop(slice []*Node) (*Node, []*Node) {
 
 // matchFromRightMostQueryToken tries to match query tokens from right to left and return the index at which point query token last matched.
 func matchFromRightMostQueryToken(node *Node, classList ClassList, queryTokens []QueryToken, i int) int {
-	outer : for i >= 0 {
+	checked := make(map[string]struct{})
+outer:
+	for i >= 0 {
 		token := queryTokens[i]
+		_, ok := checked[token.Selector]
+		if ok{
+			break
+		}else{
+			checked[token.Selector] = struct{}{}
+		}
+
 		switch token.Type {
 		case Id:
 			idName, _ := node.GetAttribute("id")
@@ -222,4 +230,12 @@ func matchFromRightMostQueryToken(node *Node, classList ClassList, queryTokens [
 		i--
 	}
 	return i
+}
+
+func (node *Node) QuerySelector(query string) *Node {
+	iter := QuerySearch(node, query)
+	for node := range iter{
+		return node
+	}
+	return nil
 }
