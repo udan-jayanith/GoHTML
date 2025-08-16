@@ -28,23 +28,23 @@ import (
 ## Example
 Heres an example of fetching a website and parsing and then using querying methods.
 ```go
-	res, err := http.Get("https://www.metalsucks.net/")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer res.Body.Close()
+res, err := http.Get("https://www.metalsucks.net/")
+if err != nil {
+	t.Fatal(err)
+}
+defer res.Body.Close()
 
-	//Parses the given html reader and then returns the root node and an error.
-	node, err := GoHtml.Decode(res.Body)
-	if err != nil {
-		t.Fatal(err)
-	}
+//Parses the given html reader and then returns the root node and an error.
+node, err := GoHtml.Decode(res.Body)
+if err != nil {
+	t.Fatal(err)
+}
 
-	nodeList := node.GetElementsByClassName("post-title")
-	iter := nodeList.IterNodeList()
-	for node := range iter{
-		print(node.GetInnerText())
-	}
+nodeList := node.GetElementsByClassName("post-title")
+iter := nodeList.IterNodeList()
+for node := range iter{
+	print(node.GetInnerText())
+}
 ```
 
 ## Changelog
