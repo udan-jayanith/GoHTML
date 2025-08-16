@@ -1,6 +1,7 @@
 package GoHtml
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/emirpasic/gods/stacks/linkedliststack"
@@ -151,18 +152,20 @@ func (node *Node) QuerySelector(query string) *Node {
 		sf := val.(stackFrame)
 
 		for diff := len(parentNodeStack) - sf.len; len(parentNodeStack) > 0 && diff > 0; diff-- {
-			pop(parentNodeStack)
+			_, parentNodeStack = pop(parentNodeStack)
 		}
 
 		classList := NewClassList()
 		classList.DecodeFrom(sf.node)
 		i := matchFromRightMostQueryToken(sf.node, classList, queryTokens, len(queryTokens)-1)
 		if i < len(queryTokens)-1 {
-			for j := len(parentNodeStack) - 1; j >= 0; j-- {
+			fmt.Println(sf.node)
+			for j := len(parentNodeStack) - 1; j >= 0 && i >= 0; j-- {
 				node := parentNodeStack[j]
 				classList := NewClassList()
 				classList.DecodeFrom(node)
 				i = matchFromRightMostQueryToken(node, classList, queryTokens, i-1)
+				fmt.Println(node, i)
 			}
 			if i <= 0{
 				return sf.node
@@ -188,13 +191,13 @@ func (node *Node) QuerySelector(query string) *Node {
 	return nil
 }
 
-func pop(slice []*Node) *Node {
+func pop(slice []*Node) (*Node, []*Node) {
 	if len(slice) > 0 {
 		res := slice[len(slice)-1]
 		slice = slice[:len(slice)-1]
-		return res
+		return res, slice
 	}
-	return nil
+	return nil, slice
 }
 
 // matchFromRightMostQueryToken tries to match query tokens from right to left and return the index at which point query token last matched.
