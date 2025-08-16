@@ -17,7 +17,7 @@ func Decode(r io.Reader) (*Node, error) {
 			break
 		}
 
-		nodeTreeBuilder.WriteNodeTree(t.CurrentNode(), tt)
+		nodeTreeBuilder.WriteNodeTree(t.GetCurrentNode(), tt)
 	}
 	return nodeTreeBuilder.GetRootNode(), nil
 
