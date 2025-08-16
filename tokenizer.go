@@ -28,7 +28,7 @@ func (t *Tokenizer) Advanced() html.TokenType {
 
 // CurrentNode returns the current node. 
 // Returned value can be nil regardless of tt.
-func (t *Tokenizer) CurrentNode() *Node {
+func (t *Tokenizer) GetCurrentNode() *Node {
 	currentToken := t.z.Token()
 	if strings.TrimSpace(currentToken.Data) == "" {
 		return nil
