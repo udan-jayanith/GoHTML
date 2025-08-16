@@ -50,10 +50,11 @@ Heres an example of fetching a website and parsing and then using querying metho
 ## Changelog
 
 Changes, bug fixes and new features in this version.
-- add: Tokenizer
-- add: NodeTreeBuilder
-- renamed: QuerySelector to Query
-- renamed: QuerySelectorAll to QueryAll
+- add: Closest
+- add: QuerySearch
+- add: QuerySelector
+- add: QuerySelectorAll
+- renamed: Tokenizer CurrentNode method to GetCurrentNode.
 
 ## Documentation
 
