@@ -2,6 +2,8 @@ package GoHtml
 
 import (
 	"strings"
+
+	"github.com/emirpasic/gods/stacks/linkedliststack"
 )
 
 // GetElementByTagName returns the first node that match with the given tagName by advancing from the node.
@@ -99,80 +101,6 @@ func (node *Node) GetElementsById(idName string) NodeList {
 	return nodeList
 }
 
-// Selector types
-const (
-	Id int = iota
-	Tag
-	Class
-)
-
-// QueryToken store data about basic css selectors(ids, classes, tags).
-type QueryToken struct {
-	Type         int
-	SelectorName string
-	Selector     string
-}
-
-// TokenizeQuery tokenizes the query and returns a list of QueryToken.
-func TokenizeQuery(query string) []QueryToken {
-	slice := make([]QueryToken, 0, 1)
-	if strings.TrimSpace(query) == "" {
-		return slice
-	}
-
-	iter := strings.SplitSeq(query, " ")
-	for sec := range iter {
-		token := QueryToken{}
-		switch sec {
-		case "", " ", ".", "#":
-			continue
-		}
-
-		switch string(sec[0]) {
-		case ".":
-			token.Type = Class
-			token.SelectorName = sec[1:]
-		case "#":
-			token.Type = Id
-			token.SelectorName = sec[1:]
-		default:
-			token.Type = Tag
-			token.SelectorName = sec
-		}
-		token.Selector = sec
-		slice = append(slice, token)
-	}
-
-	return slice
-}
-
-// matchQueryTokens returns wether the queryTokens match given the node. 
-func matchQueryTokens(node *Node, queryTokens []QueryToken) bool {
-	if len(queryTokens) == 0 {
-		return false
-	}
-	classList := NewClassList()
-	classList.DecodeFrom(node)
-	for _, token := range queryTokens {
-		switch token.Type {
-		case Id:
-			idName, _ := node.GetAttribute("id")
-			if token.SelectorName != idName {
-				return false
-			}
-		case Tag:
-			if node.GetTagName() != token.SelectorName {
-				return false
-			}
-		case Class:
-			if !classList.Contains(token.SelectorName) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 // Query returns the first node that matches with the give query.
 func (node *Node) Query(query string) *Node {
 	queryTokens := TokenizeQuery(query)
@@ -190,15 +118,105 @@ func (node *Node) Query(query string) *Node {
 }
 
 // QueryAll returns a NodeList containing nodes that matched with the given query.
-func (node *Node) QueryAll(query string) NodeList{
+func (node *Node) QueryAll(query string) NodeList {
 	nodeList := NewNodeList()
 	queryTokens := TokenizeQuery(query)
 	traverser := NewTraverser(node)
 
-	for node := range traverser.Walkthrough{
+	for node := range traverser.Walkthrough {
 		if matchQueryTokens(node, queryTokens) {
 			nodeList.Append(node)
 		}
 	}
 	return nodeList
+}
+
+func (node *Node) QuerySelector(query string) *Node {
+	queryTokens := TokenizeQuery(query)
+
+	parentNodeStack := make([]*Node, 0, 2)
+	stack := linkedliststack.New()
+	type stackFrame struct {
+		//len should contain the length of the parentNodeStack at the stack push time.
+		len  int
+		node *Node
+	}
+	stack.Push(stackFrame{
+		len:  len(parentNodeStack),
+		node: node,
+	})
+
+	for stack.Size() > 0 {
+		val, _ := stack.Pop()
+		sf := val.(stackFrame)
+
+		for diff := len(parentNodeStack) - sf.len; len(parentNodeStack) > 0 && diff > 0; diff-- {
+			pop(parentNodeStack)
+		}
+
+		classList := NewClassList()
+		classList.DecodeFrom(sf.node)
+		i := matchFromRightMostQueryToken(sf.node, classList, queryTokens, len(queryTokens)-1)
+		if i < len(queryTokens)-1 {
+			for j := len(parentNodeStack) - 1; j >= 0; j-- {
+				node := parentNodeStack[j]
+				classList := NewClassList()
+				classList.DecodeFrom(node)
+				i = matchFromRightMostQueryToken(node, classList, queryTokens, i-1)
+			}
+			if i <= 0{
+				return sf.node
+			}
+		}
+
+		if sf.node.GetNextNode() != nil {
+			stack.Push(stackFrame{
+				len:  len(parentNodeStack),
+				node: sf.node.GetNextNode(),
+			})
+		}
+
+		if sf.node.GetChildNode() != nil {
+			childNode := sf.node.GetChildNode()
+			parentNodeStack = append(parentNodeStack, childNode)
+			stack.Push(stackFrame{
+				len:  len(parentNodeStack),
+				node: childNode,
+			})
+		}
+	}
+	return nil
+}
+
+func pop(slice []*Node) *Node {
+	if len(slice) > 0 {
+		res := slice[len(slice)-1]
+		slice = slice[:len(slice)-1]
+		return res
+	}
+	return nil
+}
+
+// matchFromRightMostQueryToken tries to match query tokens from right to left and return the index at which point query token last matched.
+func matchFromRightMostQueryToken(node *Node, classList ClassList, queryTokens []QueryToken, i int) int {
+	outer : for i >= 0 {
+		token := queryTokens[i]
+		switch token.Type {
+		case Id:
+			idName, _ := node.GetAttribute("id")
+			if token.SelectorName != idName {
+				break outer
+			}
+		case Class:
+			if !classList.Contains(token.SelectorName) {
+				break outer
+			}
+		case Tag:
+			if node.GetTagName() != token.SelectorName {
+				break outer
+			}
+		}
+		i--
+	}
+	return i
 }

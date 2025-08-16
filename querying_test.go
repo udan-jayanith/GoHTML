@@ -166,7 +166,7 @@ func TestSelectorTokenizer(t *testing.T) {
 	}
 }
 
-func TestQuerySelector(t *testing.T) {
+func TestQuery(t *testing.T) {
 	node, err := testFile4NodeTree()
 	if err != nil {
 		t.Fatal(err)
@@ -180,7 +180,7 @@ func TestQuerySelector(t *testing.T) {
 	}
 }
 
-func TestQuerySelectorAll(t *testing.T) {
+func TestQueryAll(t *testing.T) {
 	node, err := testFile4NodeTree()
 	if err != nil {
 		t.Fatal(err)
@@ -191,4 +191,17 @@ func TestQuerySelectorAll(t *testing.T) {
 	if nodeList.Len() != 2{
 		t.Fatal("")
 	}
+}
+
+func TestQuerySelector(t *testing.T){
+	node, err := testFile4NodeTree()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	node = node.QuerySelector("html .ordered-list ol li .ordered-item")
+	if node == nil {
+		t.Fatal("Node is nill after QuerySelector")
+	}
+	t.Log(node.GetInnerText())
 }
