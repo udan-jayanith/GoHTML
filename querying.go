@@ -3,8 +3,6 @@ package GoHtml
 import (
 	"iter"
 	"strings"
-
-	"github.com/emirpasic/gods/stacks/linkedliststack"
 )
 
 // GetElementByTagName returns the first node that match with the given tagName by advancing from the node.
@@ -136,75 +134,32 @@ func (node *Node) QueryAll(query string) NodeList {
 QuerySearch tokenizes the query string and search for nodes that matches with the right most query token. After matching right most query it proceeds to match nodes parents nodes for left over tokens and then passed that node to (yield/range). QuerySearch search the whole node tree for matches unless yield get canceled or range iterator get cancel.
 */
 func QuerySearch(node *Node, query string) iter.Seq[*Node] {
+	traverser := NewTraverser(node)
 	return func(yield func(node *Node) bool) {
 		queryTokens := TokenizeQuery(query)
-
-		parentNodeStack := make([]*Node, 0, 2)
-		stack := linkedliststack.New()
-		type stackFrame struct {
-			//len should contain the length of the parentNodeStack at the stack push time.
-			len  int
-			node *Node
-		}
-		stack.Push(stackFrame{
-			len:  len(parentNodeStack),
-			node: node,
-		})
-
-		for stack.Size() > 0 {
-			val, _ := stack.Pop()
-			sf := val.(stackFrame)
-
-			if sf.len <= len(parentNodeStack) {
-				parentNodeStack = parentNodeStack[:sf.len]
+		iter := traverser.Walkthrough
+		for node := range iter {
+			i := matchFromRightMostQueryToken(node, queryTokens, len(queryTokens)-1)
+			if i == len(queryTokens)-1{
+				continue
 			}
-
-			classList := NewClassList()
-			classList.DecodeFrom(sf.node)
-			i := matchFromRightMostQueryToken(sf.node, classList, queryTokens, len(queryTokens)-1)
-			if i < len(queryTokens)-1 {
-				for j := len(parentNodeStack) - 1; j >= 0 && i >= 0; j-- {
-					node := parentNodeStack[j]
-					classList := NewClassList()
-					classList.DecodeFrom(node)
-					i = matchFromRightMostQueryToken(node, classList, queryTokens, i-1)
-				}
-
-				if i < 0 && !yield(sf.node) {
-					return
-				}
+			parentNode := node.GetParent()
+			for parentNode != nil && i>=0 {
+				i = matchFromRightMostQueryToken(parentNode, queryTokens, i)
+				parentNode = parentNode.GetParent()
 			}
-
-			if sf.node.GetNextNode() != nil {
-				stack.Push(stackFrame{
-					len:  len(parentNodeStack),
-					node: sf.node.GetNextNode(),
-				})
-			}
-
-			if sf.node.GetChildNode() != nil {
-				childNode := sf.node.GetChildNode()
-				parentNodeStack = append(parentNodeStack, sf.node)
-				stack.Push(stackFrame{
-					len:  len(parentNodeStack),
-					node: childNode,
-				})
+			if i < 0 && !yield(node){
+				return
 			}
 		}
-	}
-}
 
-func pop(slice []*Node) (*Node, []*Node) {
-	if len(slice) > 0 {
-		res := slice[len(slice)-1]
-		slice = slice[:len(slice)-1]
-		return res, slice
 	}
-	return nil, slice
 }
 
 // matchFromRightMostQueryToken tries to match query tokens from right to left and return the index at which point query token last matched.
-func matchFromRightMostQueryToken(node *Node, classList ClassList, queryTokens []QueryToken, i int) int {
+func matchFromRightMostQueryToken(node *Node, queryTokens []QueryToken, i int) int {
+	classList := NewClassList()
+	classList.DecodeFrom(node)
 	checked := make(map[string]struct{})
 outer:
 	for i >= 0 {
