@@ -20,7 +20,7 @@ func TestFetchPostCovers(t *testing.T){
 		t.Fatal(err)
 	}
 
-	nodeList := node.QueryAll(".sm-feat .clearfix article")
+	nodeList := node.QuerySelectorAll(".left-content article .post-title")
 	t.Log("Got ", nodeList.Len(), " post titles.")
 	iter := nodeList.IterNodeList()
 	for node := range iter{
