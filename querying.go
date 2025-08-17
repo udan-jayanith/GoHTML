@@ -133,7 +133,7 @@ func (node *Node) QueryAll(query string) NodeList {
 }
 
 /*
-QuerySearch tokenizes the query string and search for nodes that matches with the right most query token. After matching right most query it proceeds to match nodes parents nodes for left over tokens and then passed that node to (yield/range). QuerySearch search the whole node tree for matches unless yield get canceled or range iterator get cancel. 
+QuerySearch tokenizes the query string and search for nodes that matches with the right most query token. After matching right most query it proceeds to match nodes parents nodes for left over tokens and then passed that node to (yield/range). QuerySearch search the whole node tree for matches unless yield get canceled or range iterator get cancel.
 */
 func QuerySearch(node *Node, query string) iter.Seq[*Node] {
 	return func(yield func(node *Node) bool) {
@@ -155,8 +155,8 @@ func QuerySearch(node *Node, query string) iter.Seq[*Node] {
 			val, _ := stack.Pop()
 			sf := val.(stackFrame)
 
-			for diff := len(parentNodeStack) - sf.len; len(parentNodeStack) > 0 && diff > 0; diff-- {
-				_, parentNodeStack = pop(parentNodeStack)
+			if sf.len <= len(parentNodeStack) {
+				parentNodeStack = parentNodeStack[:sf.len]
 			}
 
 			classList := NewClassList()
@@ -169,7 +169,8 @@ func QuerySearch(node *Node, query string) iter.Seq[*Node] {
 					classList.DecodeFrom(node)
 					i = matchFromRightMostQueryToken(node, classList, queryTokens, i-1)
 				}
-				if i < 0 && !yield(sf.node){
+
+				if i < 0 && !yield(sf.node) {
 					return
 				}
 			}
@@ -183,7 +184,7 @@ func QuerySearch(node *Node, query string) iter.Seq[*Node] {
 
 			if sf.node.GetChildNode() != nil {
 				childNode := sf.node.GetChildNode()
-				parentNodeStack = append(parentNodeStack, childNode)
+				parentNodeStack = append(parentNodeStack, sf.node)
 				stack.Push(stackFrame{
 					len:  len(parentNodeStack),
 					node: childNode,
@@ -209,9 +210,9 @@ outer:
 	for i >= 0 {
 		token := queryTokens[i]
 		_, ok := checked[token.Selector]
-		if ok{
+		if ok {
 			break
-		}else{
+		} else {
 			checked[token.Selector] = struct{}{}
 		}
 
@@ -235,21 +236,21 @@ outer:
 	return i
 }
 
-//QuerySelector only returns the first node that matches with the QuerySearch.
+// QuerySelector only returns the first node that matches with the QuerySearch.
 func (node *Node) QuerySelector(query string) *Node {
 	iter := QuerySearch(node, query)
-	for node := range iter{
+	for node := range iter {
 		return node
 	}
 	return nil
 }
 
-//QuerySelectorAll stores nodes passed down by QuerySearch in a nodeList and returns the nodeList.
-func (node *Node) QuerySelectorAll(query string) NodeList{
+// QuerySelectorAll stores nodes passed down by QuerySearch in a nodeList and returns the nodeList.
+func (node *Node) QuerySelectorAll(query string) NodeList {
 	iter := QuerySearch(node, query)
 	nodeList := NewNodeList()
-	
-	for node := range iter{
+
+	for node := range iter {
 		nodeList.Append(node)
 	}
 	return nodeList

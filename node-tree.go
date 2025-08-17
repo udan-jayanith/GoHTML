@@ -115,6 +115,7 @@ func (node *Node) AppendChild(childNode *Node) {
 
 	lastNode := node.GetChildNode().GetLastNode()
 	childNode.SetPreviousNode(lastNode)
+	childNode.setParentNode(lastNode.GetParent())
 	lastNode.SetNextNode(childNode)
 }
 
@@ -122,12 +123,13 @@ func (node *Node) AppendChild(childNode *Node) {
 func (node *Node) Append(newNode *Node) {
 	lastNode := node.GetLastNode()
 	newNode.SetPreviousNode(lastNode)
+	newNode.setParentNode(lastNode.GetParent())
 	lastNode.SetNextNode(newNode)
 }
 
 // GetParent returns a pointer to the parent node.
 func (node *Node) GetParent() *Node {
-	return node.GetFirstNode().getParentNode()
+	return node.parentNode
 }
 
 // GetLastNode returns the last node in the node branch.

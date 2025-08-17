@@ -188,12 +188,12 @@ func TestQueryAll(t *testing.T) {
 	}
 
 	nodeList := node.QueryAll("h2")
-	if nodeList.Len() != 2{
+	if nodeList.Len() != 2 {
 		t.Fatal("")
 	}
 }
 
-func TestQuerySelector(t *testing.T){
+func TestQuerySelector(t *testing.T) {
 	node, err := testFile4NodeTree()
 	if err != nil {
 		t.Fatal(err)
@@ -202,6 +202,37 @@ func TestQuerySelector(t *testing.T){
 	node = node.QuerySelector("html .ordered-list ol li .ordered-item")
 	if node == nil {
 		t.Fatal("Node is nill after QuerySelector")
+	} else if node.GetInnerText() != "Apple" {
+		t.Fatal("Unexpected text")
 	}
-	t.Log(node.GetInnerText())
+}
+
+func TestQuerySelectorAll(t *testing.T) {
+	node, err := testFile4NodeTree()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	nodeList := node.QuerySelectorAll(".unordered-list li")
+	if nodeList.Len() == 0 {
+		t.Fatal("Node list is empty")
+	}else if nodeList.Len() != 3{
+		t.Fatal("Extra node in the node list.", nodeList.Len())
+	}
+	stack := linkedliststack.New()
+	stack.Push("Kottue")
+	stack.Push("Pizza")
+	stack.Push("Cake")
+
+	iter := nodeList.IterNodeList()
+	for node := range iter{
+		val, _ := stack.Pop()
+		str := val.(string)
+		if node.GetInnerText() != str{
+			t.Fatal("Got unexpected text.", "Expected", str, "But got", node.GetInnerText())
+		}else{
+			t.Log(node.GetInnerText())
+		}
+	}
 }
