@@ -100,36 +100,6 @@ func (node *Node) GetElementsById(idName string) NodeList {
 	return nodeList
 }
 
-// Query returns the first node that matches with the give query.
-func (node *Node) Query(query string) *Node {
-	queryTokens := TokenizeQuery(query)
-
-	traverser := NewTraverser(node)
-	var res *Node
-	traverser.Walkthrough(func(node *Node) TraverseCondition {
-		if matchQueryTokens(node, queryTokens) {
-			res = node
-			return StopWalkthrough
-		}
-		return ContinueWalkthrough
-	})
-	return res
-}
-
-// QueryAll returns a NodeList containing nodes that matched with the given query.
-func (node *Node) QueryAll(query string) NodeList {
-	nodeList := NewNodeList()
-	queryTokens := TokenizeQuery(query)
-	traverser := NewTraverser(node)
-
-	for node := range traverser.Walkthrough {
-		if matchQueryTokens(node, queryTokens) {
-			nodeList.Append(node)
-		}
-	}
-	return nodeList
-}
-
 /*
 QuerySearch tokenizes the query string and search for nodes that matches with the right most query token. After matching right most query it proceeds to match nodes parents nodes for left over tokens and then passed that node to (yield/range). QuerySearch search the whole node tree for matches unless yield get canceled or range iterator get cancel.
 */

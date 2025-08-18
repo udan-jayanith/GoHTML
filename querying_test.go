@@ -166,33 +166,6 @@ func TestSelectorTokenizer(t *testing.T) {
 	}
 }
 
-func TestQuery(t *testing.T) {
-	node, err := testFile4NodeTree()
-	if err != nil {
-		t.Fatal(err)
-		return
-	}
-	imgEl := node.Query("img #idElement")
-	imgSrc, _ := imgEl.GetAttribute("src")
-	imgAlt, _ := imgEl.GetAttribute("alt")
-	if imgSrc != "" || imgAlt != "" {
-		t.Fatal("")
-	}
-}
-
-func TestQueryAll(t *testing.T) {
-	node, err := testFile4NodeTree()
-	if err != nil {
-		t.Fatal(err)
-		return
-	}
-
-	nodeList := node.QueryAll("h2")
-	if nodeList.Len() != 2 {
-		t.Fatal("")
-	}
-}
-
 func TestQuerySelector(t *testing.T) {
 	node, err := testFile4NodeTree()
 	if err != nil {
