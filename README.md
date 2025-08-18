@@ -2,6 +2,7 @@
 
 A HTML parse and a serializer for Go. GoHTML tries to keep semantic similar to JS-DOM API while trying to keep the API simple by not forcing JS-DOM model into GoHTML. Because of this GoHTML has node tree model. GoHTML tokenizer uses std net/html module for tokenizing in underlining layer. There for it's users responsibility to make sure inputs to GoHTML is UTF-8 encoded. GoHTML allows direct access to the node tree.
 
+Note: Under development.
 ## Installation
 
 Run the following command in project directory in order to install.
