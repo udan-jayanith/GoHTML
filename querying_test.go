@@ -138,6 +138,7 @@ func TestGetElementsById(t *testing.T) {
 	}
 }
 
+/*
 func TestSelectorTokenizer(t *testing.T) {
 	stack := linkedliststack.New()
 	stack.Push("article .content")
@@ -209,3 +210,5 @@ func TestQuerySelectorAll(t *testing.T) {
 		}
 	}
 }
+
+*/

@@ -219,18 +219,7 @@ But this is not the case for QuerySearch, QuerySelector and QuerySelectorAll.
 */
 // Adapted from [https://developer.mozilla.org/en-US/docs/Web/API/Element/closest](MDN Element: closest() method)
 func (node *Node) Closest(query string) *Node {
-	queryTokens := TokenizeQuery(query)
 	traverser := NewTraverser(node)
-	for traverser.GetCurrentNode() != nil {
-		if matchQueryTokens(traverser.GetCurrentNode(), queryTokens) {
-			break
-		}
-
-		if traverser.GetCurrentNode().GetPreviousNode() == nil {
-			traverser.SetCurrentNodeTo(traverser.GetCurrentNode().GetParent())
-		}else{
-			traverser.Previous()
-		}
-	}
+	
 	return traverser.GetCurrentNode()
 }

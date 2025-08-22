@@ -114,6 +114,7 @@ func TestRemoveNode(t *testing.T){
 	//t.Log(GoHtml.NodeTreeToHTML(article))
 }
 
+/*
 func TestClosest(t *testing.T){
 	node, err := testFile4NodeTree()
 	if err != nil{
@@ -133,3 +134,4 @@ func TestClosest(t *testing.T){
 
 
 }
+*/

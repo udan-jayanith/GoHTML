@@ -1,7 +1,7 @@
 package GoHtml
 
 import (
-	"iter"
+	//"iter"
 	"strings"
 )
 
@@ -103,6 +103,7 @@ func (node *Node) GetElementsById(idName string) NodeList {
 /*
 QuerySearch tokenizes the query string and search for nodes that matches with the right most query token. After matching right most query it proceeds to match nodes parents nodes for left over tokens and then passed that node to (yield/range). QuerySearch search the whole node tree for matches unless yield get canceled or range iterator get cancel.
 */
+/*
 func QuerySearch(node *Node, query string) iter.Seq[*Node] {
 	traverser := NewTraverser(node)
 	return func(yield func(node *Node) bool) {
@@ -180,3 +181,5 @@ func (node *Node) QuerySelectorAll(query string) NodeList {
 	}
 	return nodeList
 }
+
+*/

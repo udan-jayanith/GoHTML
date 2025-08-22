@@ -6,7 +6,9 @@ import(
 	"net/http"
 	"time"
 )
-
+/*
+Adapted from [GoQuery example](https://github.com/PuerkitoBio/goquery?tab=readme-ov-file#examples)
+*/
 func TestFetchPostCovers(t *testing.T){
 	res, err := http.Get("https://www.metalsucks.net/")
 	if err != nil {
