@@ -55,7 +55,7 @@ func NewSelector(selector string) Selector {
 		selectorStruct.selectorType = Tag
 	}
 
-	selectorStruct.selector = selector
+	selectorStruct.selector = strings.ToLower(selector)
 	if selectorStruct.selectorType != Tag {
 		selectorStruct.selectorName = selector[1:]
 	} else {
