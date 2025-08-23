@@ -1,7 +1,7 @@
 package GoHtml
 
 import (
-	//"iter"
+	"iter"
 	"strings"
 )
 
@@ -103,23 +103,14 @@ func (node *Node) GetElementsById(idName string) NodeList {
 /*
 QuerySearch tokenizes the query string and search for nodes that matches with the right most query token. After matching right most query it proceeds to match nodes parents nodes for left over tokens and then passed that node to (yield/range). QuerySearch search the whole node tree for matches unless yield get canceled or range iterator get cancel.
 */
-/*
-func QuerySearch(node *Node, query string) iter.Seq[*Node] {
+
+func QuerySearch(node *Node, selector string) iter.Seq[*Node] {
 	traverser := NewTraverser(node)
 	return func(yield func(node *Node) bool) {
-		queryTokens := TokenizeQuery(query)
+		selectorTokens := TokenizeSelectorsAndCombinators(selector)
 		iter := traverser.Walkthrough
 		for node := range iter {
-			i := matchFromRightMostQueryToken(node, queryTokens, len(queryTokens)-1)
-			if i == len(queryTokens)-1{
-				continue
-			}
-			parentNode := node.GetParent()
-			for parentNode != nil && i>=0 {
-				i = matchFromRightMostQueryToken(parentNode, queryTokens, i)
-				parentNode = parentNode.GetParent()
-			}
-			if i < 0 && !yield(node){
+			if matchFromRightMostSelectors(node, selectorTokens) && !yield(node) {
 				return
 			}
 		}
@@ -128,39 +119,16 @@ func QuerySearch(node *Node, query string) iter.Seq[*Node] {
 }
 
 // matchFromRightMostQueryToken tries to match query tokens from right to left and return the index at which point query token last matched.
-func matchFromRightMostQueryToken(node *Node, queryTokens []QueryToken, i int) int {
-	classList := NewClassList()
-	classList.DecodeFrom(node)
-	checked := make(map[string]struct{})
-outer:
-	for i >= 0 {
-		token := queryTokens[i]
-		_, ok := checked[token.Selector]
-		if ok {
+func matchFromRightMostSelectors(node *Node, selectorTokens []CombinatorEl) bool {
+	for i := len(selectorTokens) - 1; i >= 0; i-- {
+		if node == nil {
 			break
-		} else {
-			checked[token.Selector] = struct{}{}
 		}
-
-		switch token.Type {
-		case Id:
-			idName, _ := node.GetAttribute("id")
-			if token.SelectorName != idName {
-				break outer
-			}
-		case Class:
-			if !classList.Contains(token.SelectorName) {
-				break outer
-			}
-		case Tag:
-			if node.GetTagName() != token.SelectorName {
-				break outer
-			}
-		}
-		i--
+		node = selectorTokens[i].getMatchingNode(node)
 	}
-	return i
+	return node != nil
 }
+
 
 // QuerySelector only returns the first node that matches with the QuerySearch.
 func (node *Node) QuerySelector(query string) *Node {
@@ -182,4 +150,3 @@ func (node *Node) QuerySelectorAll(query string) NodeList {
 	return nodeList
 }
 
-*/

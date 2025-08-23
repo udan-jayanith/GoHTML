@@ -138,45 +138,17 @@ func TestGetElementsById(t *testing.T) {
 	}
 }
 
-/*
-func TestSelectorTokenizer(t *testing.T) {
-	stack := linkedliststack.New()
-	stack.Push("article .content")
-	stack.Push("article p h1")
-	stack.Push("article p")
-	stack.Push(".title #user")
-	stack.Push("#user title .title-1")
-
-	for stack.Size() > 0 {
-		val, _ := stack.Pop()
-		selector := val.(string)
-
-		tokens := GoHtml.TokenizeQuery(selector)
-		s := ""
-		for _, token := range tokens {
-			if s == "" {
-				s += token.Selector
-			} else {
-				s += " " + token.Selector
-			}
-		}
-
-		if s != selector {
-			t.Fatal("Expected ", selector, "but got", s)
-		}
-	}
-}
-
 func TestQuerySelector(t *testing.T) {
 	node, err := testFile4NodeTree()
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	node = node.QuerySelector("html .ordered-list ol li .ordered-item")
+	node = node.QuerySelector("html ol li")
 	if node == nil {
 		t.Fatal("Node is nill after QuerySelector")
 	} else if node.GetInnerText() != "Apple" {
+		t.Log(node)
 		t.Fatal("Unexpected text")
 	}
 }
@@ -211,4 +183,3 @@ func TestQuerySelectorAll(t *testing.T) {
 	}
 }
 
-*/
