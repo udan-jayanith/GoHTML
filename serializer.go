@@ -30,25 +30,12 @@ func encodeListAttributes(node *Node) string {
 	return w.String()
 }
 
-// Encode writes to w encoding of rootNode
+// Encode writes to w encoding of the node tree from rootNode.
 func Encode(w io.Writer, rootNode *Node) {
 	type stackFrame struct {
 		node      *Node
 		openedTag bool
 	}
-
-	/*
-	traverser := NewTraverser(rootNode)
-	traverser.Walkthrough(func(node *Node) TraverseCondition {
-		fmt.Println("+++++++++++++++++++++++++++")
-		if node.IsTextNode() {
-			fmt.Println(node.text)
-		} else {
-			fmt.Println(node.GetTagName())
-		}
-		return ContinueWalkthrough
-	})
-	*/
 
 	stack := linkedliststack.New()
 	stack.Push(stackFrame{node: rootNode, openedTag: false})

@@ -2,6 +2,8 @@ package GoHtml
 
 import (
 	"strings"
+
+	"golang.org/x/net/html"
 )
 
 type BasicSelector int
@@ -40,7 +42,7 @@ func matchNode(node *Node, basicSelectorName string, basicSelectorType BasicSele
 }
 
 func NewSelector(selector string) Selector {
-	selector = strings.TrimSpace(selector)
+	selector = strings.TrimSpace(html.EscapeString(selector))
 	selectorStruct := Selector{}
 	if len(selector) == 0 || (selector[0] == '.' || selector[0] == '#') && len(selector) <= 1 {
 		return selectorStruct
@@ -82,12 +84,27 @@ type CombinatorEl struct {
 }
 
 func TokenizeSelectorsAndCombinators(selector string) []CombinatorEl {
+	iter := func(yield func(string) bool) {
+		currentStr := ""
+		for _, char := range selector {
+			switch char {
+			case ' ', '>', '+', '~':
+				if !yield(currentStr) || !yield(string(char)){
+					return
+				}
+				currentStr = ""
+			default:
+				currentStr+=string(char)
+			}
+		}
+		yield(currentStr)
+	}
+
 	list := make([]CombinatorEl, 0, 1)
-	slice := strings.SplitSeq(selector, " ")
 	currentCombinator := *new(CombinatorEl)
 	currentCombinator.Selector1 = NewSelector("")
 	currentCombinator.Type = NoneCombinator
-	for str := range slice {
+	for str := range iter {
 		if strings.TrimSpace(str) == "" {
 			continue
 		}
@@ -164,7 +181,7 @@ func (ce *CombinatorEl) getDirectChild(node *Node) *Node {
 }
 
 // isNextSibling return whether the given node is of ce.Selector2 and next sibling of ce.Selector1
-func (ce *CombinatorEl)   getNextSibling(node *Node) *Node {
+func (ce *CombinatorEl) getNextSibling(node *Node) *Node {
 	if node == nil {
 		return nil
 	}
@@ -183,7 +200,7 @@ func (ce *CombinatorEl) getSubsequentSibling(node *Node) *Node {
 
 	traverser := NewTraverser(node)
 	for traverser.GetCurrentNode() != nil {
-		if matchNode(traverser.GetCurrentNode(), ce.Selector1.selector, ce.Selector1.selectorType){
+		if matchNode(traverser.GetCurrentNode(), ce.Selector1.selector, ce.Selector1.selectorType) {
 			return traverser.GetCurrentNode()
 		}
 		traverser.Previous()
