@@ -1,13 +1,14 @@
 package GoHtml_test
 
-import(
+import (
 	"testing"
-	"github.com/udan-jayanith/GoHTML"
+
+	GoHtml "github.com/udan-jayanith/GoHTML"
 )
 
-func TestTokenizeSelector(t *testing.T){
+func TestTokenizeSelector(t *testing.T) {
 	slice := GoHtml.TokenizeSelectorsAndCombinators(".class-1 > .class-2 + .class-3 a")
-	for _, el := range slice{
-		t.Log(el)
+	if len(slice) != 4 {
+		t.Fatal("Exacted slice length of", 4, "but got", len(slice))
 	}
 }

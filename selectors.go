@@ -2,7 +2,6 @@ package GoHtml
 
 import (
 	"strings"
-
 	"golang.org/x/net/html"
 )
 
@@ -194,13 +193,13 @@ func (ce *CombinatorEl) getNextSibling(node *Node) *Node {
 }
 
 func (ce *CombinatorEl) getSubsequentSibling(node *Node) *Node {
-	if node == nil || !matchNode(node, ce.Selector2.selector, ce.Selector2.selectorType) {
+	if node == nil || !matchNode(node, ce.Selector2.selectorName, ce.Selector2.selectorType) {
 		return nil
 	}
 
 	traverser := NewTraverser(node)
 	for traverser.GetCurrentNode() != nil {
-		if matchNode(traverser.GetCurrentNode(), ce.Selector1.selector, ce.Selector1.selectorType) {
+		if matchNode(traverser.GetCurrentNode(), ce.Selector1.selectorName, ce.Selector1.selectorType) {
 			return traverser.GetCurrentNode()
 		}
 		traverser.Previous()

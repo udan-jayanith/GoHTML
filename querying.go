@@ -101,9 +101,8 @@ func (node *Node) GetElementsById(idName string) NodeList {
 }
 
 /*
-QuerySearch tokenizes the query string and search for nodes that matches with the right most query token. After matching right most query it proceeds to match nodes parents nodes for left over tokens and then passed that node to (yield/range). QuerySearch search the whole node tree for matches unless yield get canceled or range iterator get cancel.
-*/
-
+QuerySearch search returns a iterator that traverse through the node tree from given node and passes nodes that matches the given selector.  
+*/ 
 func QuerySearch(node *Node, selector string) iter.Seq[*Node] {
 	traverser := NewTraverser(node)
 	return func(yield func(node *Node) bool) {
@@ -130,18 +129,18 @@ func matchFromRightMostSelectors(node *Node, selectorTokens []CombinatorEl) bool
 }
 
 
-// QuerySelector only returns the first node that matches with the QuerySearch.
-func (node *Node) QuerySelector(query string) *Node {
-	iter := QuerySearch(node, query)
+// QuerySelector returns the first node that matches with the selector from the node.
+func (node *Node) QuerySelector(selector string) *Node {
+	iter := QuerySearch(node, selector)
 	for node := range iter {
 		return node
 	}
 	return nil
 }
 
-// QuerySelectorAll stores nodes passed down by QuerySearch in a nodeList and returns the nodeList.
-func (node *Node) QuerySelectorAll(query string) NodeList {
-	iter := QuerySearch(node, query)
+// QuerySelectorAll returns a NodeList that has node that matches the selector form the node.
+func (node *Node) QuerySelectorAll(selector string) NodeList {
+	iter := QuerySearch(node, selector)
 	nodeList := NewNodeList()
 
 	for node := range iter {
