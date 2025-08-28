@@ -114,7 +114,6 @@ func TestRemoveNode(t *testing.T){
 	//t.Log(GoHtml.NodeTreeToHTML(article))
 }
 
-/*
 func TestClosest(t *testing.T){
 	node, err := testFile4NodeTree()
 	if err != nil{
@@ -125,7 +124,7 @@ func TestClosest(t *testing.T){
 		t.Fatal("Node is nil.")
 	}
 
-	node = node.Closest("ol .ordered-list")
+	node = node.Closest("img+.ordered-list")
 	if node == nil {
 		t.Fatal("Node is nil")
 	}else if node.GetTagName() != "ol"{
@@ -134,4 +133,3 @@ func TestClosest(t *testing.T){
 
 
 }
-*/

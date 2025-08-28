@@ -211,6 +211,16 @@ func (node *Node) IsTextNode() bool {
 // Adapted from [https://developer.mozilla.org/en-US/docs/Web/API/Element/closest](MDN Element: closest() method)
 func (node *Node) Closest(selector string) *Node {
 	traverser := NewTraverser(node)
-	
+	selectors := TokenizeSelectorsAndCombinators(selector)
+
+	for traverser.GetCurrentNode() != nil {
+		if matchFromRightMostSelectors(traverser.GetCurrentNode(), selectors) {
+			break
+		} else if traverser.GetCurrentNode().GetPreviousNode() == nil {
+			traverser.SetCurrentNodeTo(traverser.GetCurrentNode().GetParent())
+		} else {
+			traverser.Previous()
+		}
+	}
 	return traverser.GetCurrentNode()
 }
