@@ -13,6 +13,7 @@ func testFile4NodeTree() (*GoHtml.Node, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	node, err := GoHtml.Decode(file)
 	return node, err
@@ -24,6 +25,7 @@ func TestGetElementByID(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
+	defer file.Close()
 
 	node, err := GoHtml.Decode(file)
 	if err != nil {
@@ -143,6 +145,7 @@ func testFile5NodeTree() (*GoHtml.Node, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	node, _ := GoHtml.Decode(file)
 	return node, nil

@@ -13,6 +13,7 @@ func TestIterNodeList1(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
+	defer file.Close()
 
 	node, err := GoHtml.Decode(file)
 	if err != nil {

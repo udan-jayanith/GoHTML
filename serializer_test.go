@@ -28,6 +28,8 @@ func TestEncode2(t *testing.T) {
 	if err != nil {
 		t.Fatal("1.html does not exists.")
 	}
+	defer file.Close()
+	
 	node, _  := GoHtml.Decode(file)
 	var builder strings.Builder
 	GoHtml.Encode(&builder, node)
