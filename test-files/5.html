@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tricky HTML</title>
+  </head>
+  <body>
+    <div id="main" class="container highlight">
+      <section>
+        <article data-type="post" class="entry">
+          <h2>First Post</h2>
+          <p class="text">This is <span>some</span> tricky <em>HTML</em> code.</p>
+          <a href="/readmore" class="btn primary">Read More</a>
+        </article>
+
+        <hr>
+        <article data-type="post draft" class="entry hidden">
+          <h2>Second Post (Draft)</h2>
+          <p class="text">Should be hidden but still queryable.</p>
+          <a href="#" class="btn secondary disabled">Disabled Link</a>
+        </article>
+      </section>
+
+      <ul id="list">
+        <li class="item">One</li>
+        <li class="item special">Two <span>extra</span></li>
+        <li class="item last-item">Three</li>
+      </ul>
+
+      <form id="login" action="/login">
+        <input type="text" name="username" placeholder="User">
+        <input type="password" name="password" placeholder="Pass">
+        <button type="submit" disabled>Submit</button>
+      </form>
+    </div>
+
+    <footer>
+      <p>&copy; <span id="year">2025</span> Example</p>
+    </footer>
+  </body>
+</html>

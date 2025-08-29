@@ -6,7 +6,9 @@ import(
 	"net/http"
 	"time"
 )
-
+/*
+Adapted from [GoQuery example](https://github.com/PuerkitoBio/goquery?tab=readme-ov-file#examples)
+*/
 func TestFetchPostCovers(t *testing.T){
 	res, err := http.Get("https://www.metalsucks.net/")
 	if err != nil {
@@ -20,7 +22,7 @@ func TestFetchPostCovers(t *testing.T){
 		t.Fatal(err)
 	}
 
-	nodeList := node.QueryAll(".sm-feat .clearfix article")
+	nodeList := node.QuerySelectorAll(".left-content article .post-title")
 	t.Log("Got ", nodeList.Len(), " post titles.")
 	iter := nodeList.IterNodeList()
 	for node := range iter{

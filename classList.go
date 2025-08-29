@@ -68,7 +68,7 @@ func (classList ClassList) Encode() string {
 	return classes
 }
 
-// EncodeTo encode className for the node.
+// EncodeTo encodes classNames for the node.
 // If node is nil EncodeTo does nothing.
 func (classList ClassList) EncodeTo(node *Node){
 	if node == nil {

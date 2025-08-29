@@ -27,7 +27,9 @@ import (
 - Querying
 
 ## Example
+
 Heres an example of fetching a website and parsing and then using querying methods.
+
 ```go
 	res, err := http.Get("https://www.metalsucks.net/")
 	if err != nil {
@@ -35,26 +37,16 @@ Heres an example of fetching a website and parsing and then using querying metho
 	}
 	defer res.Body.Close()
 
-	//Parses the given html reader and then returns the root node and an error.
 	node, err := GoHtml.Decode(res.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	nodeList := node.GetElementsByClassName("post-title")
-	iter := nodeList.IterNodeList()
-	for node := range iter{
-		print(node.GetInnerText())
+	nodeList := node.QuerySelectorAll(".left-content article .post-title")
+	for node := range nodeList.IterNodeList(){
+		println(node.GetInnerText())
 	}
 ```
-
-## Changelog
-
-Changes, bug fixes and new features in this version.
-- add: Tokenizer
-- add: NodeTreeBuilder
-- renamed: QuerySelector to Query
-- renamed: QuerySelectorAll to QueryAll
 
 ## Documentation
 

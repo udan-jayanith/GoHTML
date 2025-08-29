@@ -1,6 +1,7 @@
 package GoHtml
 
 import (
+	"iter"
 	"strings"
 )
 
@@ -99,105 +100,52 @@ func (node *Node) GetElementsById(idName string) NodeList {
 	return nodeList
 }
 
-// Selector types
-const (
-	Id int = iota
-	Tag
-	Class
-)
-
-// QueryToken store data about basic css selectors(ids, classes, tags).
-type QueryToken struct {
-	Type         int
-	SelectorName string
-	Selector     string
-}
-
-// TokenizeQuery tokenizes the query and returns a list of QueryToken.
-func TokenizeQuery(query string) []QueryToken {
-	slice := make([]QueryToken, 0, 1)
-	if strings.TrimSpace(query) == "" {
-		return slice
-	}
-
-	iter := strings.SplitSeq(query, " ")
-	for sec := range iter {
-		token := QueryToken{}
-		switch sec {
-		case "", " ", ".", "#":
-			continue
-		}
-
-		switch string(sec[0]) {
-		case ".":
-			token.Type = Class
-			token.SelectorName = sec[1:]
-		case "#":
-			token.Type = Id
-			token.SelectorName = sec[1:]
-		default:
-			token.Type = Tag
-			token.SelectorName = sec
-		}
-		token.Selector = sec
-		slice = append(slice, token)
-	}
-
-	return slice
-}
-
-func matchQueryTokens(node *Node, queryTokens []QueryToken) bool {
-	if len(queryTokens) == 0 {
-		return false
-	}
-	classList := NewClassList()
-	classList.DecodeFrom(node)
-	for _, token := range queryTokens {
-		switch token.Type {
-		case Id:
-			idName, _ := node.GetAttribute("id")
-			if token.SelectorName != idName {
-				return false
-			}
-		case Tag:
-			if node.GetTagName() != token.SelectorName {
-				return false
-			}
-		case Class:
-			if !classList.Contains(token.SelectorName) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-// Query returns the first node that matches with the give query.
-func (node *Node) Query(query string) *Node {
-	queryTokens := TokenizeQuery(query)
-
+/*
+QuerySearch search returns a iterator that traverse through the node tree from given node and passes nodes that matches the given selector.  
+*/ 
+func QuerySearch(node *Node, selector string) iter.Seq[*Node] {
 	traverser := NewTraverser(node)
-	var res *Node
-	traverser.Walkthrough(func(node *Node) TraverseCondition {
-		if matchQueryTokens(node, queryTokens) {
-			res = node
-			return StopWalkthrough
+	return func(yield func(node *Node) bool) {
+		selectorTokens := TokenizeSelectorsAndCombinators(selector)
+		iter := traverser.Walkthrough
+		for node := range iter {
+			if matchFromRightMostSelectors(node, selectorTokens) && !yield(node) {
+				return
+			}
 		}
-		return ContinueWalkthrough
-	})
-	return res
+
+	}
 }
 
-// QueryAll returns a NodeList containing nodes that matched with the given query.
-func (node *Node) QueryAll(query string) NodeList{
+// matchFromRightMostQueryToken tries to match query tokens from right to left and return the index at which point query token last matched.
+func matchFromRightMostSelectors(node *Node, selectorTokens []CombinatorEl) bool {
+	for i := len(selectorTokens) - 1; i >= 0; i-- {
+		if node == nil {
+			break
+		}
+		node = selectorTokens[i].getMatchingNode(node)
+	}
+	return node != nil
+}
+
+
+// QuerySelector returns the first node that matches with the selector from the node.
+func (node *Node) QuerySelector(selector string) *Node {
+	iter := QuerySearch(node, selector)
+	for node := range iter {
+		return node
+	}
+	return nil
+}
+
+// QuerySelectorAll returns a NodeList that has node that matches the selector form the node.
+func (node *Node) QuerySelectorAll(selector string) NodeList {
+	iter := QuerySearch(node, selector)
 	nodeList := NewNodeList()
-	queryTokens := TokenizeQuery(query)
-	traverser := NewTraverser(node)
 
-	for node := range traverser.Walkthrough{
-		if matchQueryTokens(node, queryTokens) {
-			nodeList.Append(node)
-		}
+	for node := range iter {
+		nodeList.Append(node)
 	}
 	return nodeList
 }
+

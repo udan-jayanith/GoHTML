@@ -2,6 +2,7 @@ package GoHtml
 
 import (
 	"strings"
+
 	"golang.org/x/net/html"
 )
 
@@ -38,7 +39,7 @@ func (node *Node) SetPreviousNode(previousNode *Node) {
 	node.previousNode = previousNode
 }
 
-// GetChildNode returns the first child elements of this node.
+// GetChildNode returns the first child node of this node.
 func (node *Node) GetChildNode() *Node {
 	return node.childNode
 }
@@ -75,7 +76,7 @@ func (node *Node) GetAttribute(attributeName string) (string, bool) {
 // RemoveAttribute remove or delete the specified attribute.
 func (node *Node) RemoveAttribute(attributeName string) {
 	delete(node.attributes, strings.TrimSpace(strings.ToLower(attributeName)))
-	
+
 }
 
 // IterateAttributes calls callback at every attribute in the node by passing attribute and value of the node.
@@ -114,6 +115,7 @@ func (node *Node) AppendChild(childNode *Node) {
 
 	lastNode := node.GetChildNode().GetLastNode()
 	childNode.SetPreviousNode(lastNode)
+	childNode.setParentNode(lastNode.GetParent())
 	lastNode.SetNextNode(childNode)
 }
 
@@ -121,12 +123,13 @@ func (node *Node) AppendChild(childNode *Node) {
 func (node *Node) Append(newNode *Node) {
 	lastNode := node.GetLastNode()
 	newNode.SetPreviousNode(lastNode)
+	newNode.setParentNode(lastNode.GetParent())
 	lastNode.SetNextNode(newNode)
 }
 
 // GetParent returns a pointer to the parent node.
 func (node *Node) GetParent() *Node {
-	return node.GetFirstNode().getParentNode()
+	return node.parentNode
 }
 
 // GetLastNode returns the last node in the node branch.
@@ -202,4 +205,22 @@ func (node *Node) RemoveNode() {
 // IsTextNode returns a boolean value indicating node is a text node or not.
 func (node *Node) IsTextNode() bool {
 	return node.GetTagName() == ""
+}
+
+// Closest traverses the node tree and its parents (heading toward the root node) until it finds a node that matches the selector and returns that node.
+// Adapted from [https://developer.mozilla.org/en-US/docs/Web/API/Element/closest](MDN Element: closest() method)
+func (node *Node) Closest(selector string) *Node {
+	traverser := NewTraverser(node)
+	selectors := TokenizeSelectorsAndCombinators(selector)
+
+	for traverser.GetCurrentNode() != nil {
+		if matchFromRightMostSelectors(traverser.GetCurrentNode(), selectors) {
+			break
+		} else if traverser.GetCurrentNode().GetPreviousNode() == nil {
+			traverser.SetCurrentNodeTo(traverser.GetCurrentNode().GetParent())
+		} else {
+			traverser.Previous()
+		}
+	}
+	return traverser.GetCurrentNode()
 }

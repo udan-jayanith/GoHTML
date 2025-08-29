@@ -8,7 +8,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-
 // Tokenizer contains a *html.Tokenizer.
 type Tokenizer struct {
 	z *html.Tokenizer
@@ -26,9 +25,9 @@ func (t *Tokenizer) Advanced() html.TokenType {
 	return t.z.Next()
 }
 
-// CurrentNode returns the current node. 
-// Returned value can be nil regardless of tt.
-func (t *Tokenizer) CurrentNode() *Node {
+// CurrentNode returns the current node.
+// Returned value can be nil regardless of token type.
+func (t *Tokenizer) GetCurrentNode() *Node {
 	currentToken := t.z.Token()
 	if strings.TrimSpace(currentToken.Data) == "" {
 		return nil
@@ -72,7 +71,7 @@ func NewNodeTreeBuilder() NodeTreeBuilder {
 	}
 }
 
-// WriteNodeTree append the node given html.TokenType
+// WriteNodeTree append the node given html.TokenType.
 func (ntb *NodeTreeBuilder) WriteNodeTree(node *Node, tt html.TokenType) {
 	switch tt {
 	case html.EndTagToken:
@@ -85,7 +84,7 @@ func (ntb *NodeTreeBuilder) WriteNodeTree(node *Node, tt html.TokenType) {
 		if node == nil {
 			return
 		}
-		
+
 		if isTopNode(ntb.currentNode, ntb.stack) {
 			ntb.currentNode.AppendChild(node)
 		} else {

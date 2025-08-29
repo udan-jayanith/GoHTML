@@ -5,7 +5,7 @@ import (
 	"iter"
 )
 
-//NodeList can store nodes by appended order.
+//NodeList can store nodes by appended order and can iterate over the node list by invoking IterNodeList method.
 type NodeList struct {
 	list      *list.List
 	currentEl *list.Element
