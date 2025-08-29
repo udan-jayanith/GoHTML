@@ -29,7 +29,7 @@ import (
 ## Example
 
 Heres an example of fetching a website and parsing and then using querying methods.
-
+Adapted for GoQuery.
 ```go
 	res, err := http.Get("https://www.metalsucks.net/")
 	if err != nil {
