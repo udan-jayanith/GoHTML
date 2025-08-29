@@ -1,6 +1,8 @@
 package GoHtml_test
 
 import (
+	"fmt"
+	"net/http"
 	"os"
 	"testing"
 
@@ -165,13 +167,12 @@ func TestQuerySelector(t *testing.T) {
 	}
 	//TODO: write test for testcases below.
 	/*
-	t.Log(rootNode.QuerySelector("body p"))
-	t.Log(rootNode.QuerySelector("html head > title"))
-	t.Log(rootNode.QuerySelector("section+ul"))
-	t.Log(rootNode.QuerySelector(".item~.last-item"))
+		t.Log(rootNode.QuerySelector("body p"))
+		t.Log(rootNode.QuerySelector("html head > title"))
+		t.Log(rootNode.QuerySelector("section+ul"))
+		t.Log(rootNode.QuerySelector(".item~.last-item"))
 	*/
 }
-
 
 func TestQuerySelectorAll(t *testing.T) {
 	rootNode, err := testFile5NodeTree()
@@ -199,4 +200,39 @@ func TestQuerySelectorAll(t *testing.T) {
 		}
 	}
 
+}
+
+func ExampleNode_QuerySelector() {
+	res, err := http.Get("https://example.com/")
+	if err != nil || res.StatusCode != http.StatusOK {
+		return
+	}
+	defer res.Body.Close()
+
+	rootNode, _ := GoHtml.Decode(res.Body)
+	res.Body.Close()
+
+	title := rootNode.QuerySelector("title")
+	if title != nil {
+		fmt.Println(title.GetInnerText())
+		//Example Domain
+	}
+}
+
+func ExampleQuerySearch() {
+	//Request the html
+	res, err := http.Get("https://example.com/")
+	if err != nil || res.StatusCode != http.StatusOK {
+		return
+	}
+	defer res.Body.Close()
+
+	//Decode the html
+	rootNode, _ := GoHtml.Decode(res.Body)
+
+	//Iterate over every node that matches the query.
+	for node := range GoHtml.QuerySearch(rootNode, ".event-columns .column .event-block h4 a") {
+		//Convert the node and it's children nodes to text html and print it.
+		fmt.Println(GoHtml.NodeTreeToHTML(node))
+	}
 }

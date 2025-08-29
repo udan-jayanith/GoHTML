@@ -1,6 +1,7 @@
 package GoHtml_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -40,4 +41,20 @@ func TestIterNodeList2(t *testing.T){
 	for node := range iter{
 		t.Log(node)
 	}
+}
+
+func ExampleNodeList(){
+	nodeList := GoHtml.NewNodeList()
+	nodeList.Append(GoHtml.CreateNode("br"))
+	nodeList.Append(GoHtml.CreateNode("hr"))
+	nodeList.Append(GoHtml.CreateNode("div"))
+
+	iter := nodeList.IterNodeList()
+	for node := range iter{
+		fmt.Println(node.GetTagName())
+	}
+	//Output: 
+	//br
+	//hr 
+	//div
 }

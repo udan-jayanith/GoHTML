@@ -39,7 +39,7 @@ func (node *Node) SetPreviousNode(previousNode *Node) {
 	node.previousNode = previousNode
 }
 
-// GetChildNode returns the first child elements of this node.
+// GetChildNode returns the first child node of this node.
 func (node *Node) GetChildNode() *Node {
 	return node.childNode
 }

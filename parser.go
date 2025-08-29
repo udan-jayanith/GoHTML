@@ -3,9 +3,9 @@ package GoHtml
 import (
 	"io"
 	"strings"
+
 	"golang.org/x/net/html"
 )
-
 
 // Decode reads from rd and create a node-tree. Then returns the root node and nil.
 func Decode(r io.Reader) (*Node, error) {
@@ -13,7 +13,7 @@ func Decode(r io.Reader) (*Node, error) {
 	nodeTreeBuilder := NewNodeTreeBuilder()
 	for {
 		tt := t.Advanced()
-		if tt == html.ErrorToken{
+		if tt == html.ErrorToken {
 			break
 		}
 
@@ -29,5 +29,4 @@ func HTMLToNodeTree(html string) (*Node, error) {
 	node, err := Decode(rd)
 	return node, err
 }
-
 
