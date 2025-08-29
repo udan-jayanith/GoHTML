@@ -71,7 +71,7 @@ func NewNodeTreeBuilder() NodeTreeBuilder {
 	}
 }
 
-// WriteNodeTree append the node given html.TokenType
+// WriteNodeTree append the node given html.TokenType.
 func (ntb *NodeTreeBuilder) WriteNodeTree(node *Node, tt html.TokenType) {
 	switch tt {
 	case html.EndTagToken:

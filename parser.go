@@ -20,7 +20,6 @@ func Decode(r io.Reader) (*Node, error) {
 		nodeTreeBuilder.WriteNodeTree(t.GetCurrentNode(), tt)
 	}
 	return nodeTreeBuilder.GetRootNode(), nil
-
 }
 
 // HTMLToNodeTree return html code as a node-tree. If error were to occur it would be SyntaxError.

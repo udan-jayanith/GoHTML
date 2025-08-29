@@ -36,7 +36,6 @@ func TestWalkthrough(t *testing.T) {
 			t.Fatal("Expected ", testList[i], "but got ", resList[i], "in index ", i)
 		}
 	}
-	t.Log(GoHtml.NodeTreeToHTML(body))
 }
 
 func ExampleTraverser_Walkthrough() {
