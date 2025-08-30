@@ -101,14 +101,13 @@ func (node *Node) GetElementsById(idName string) NodeList {
 }
 
 /*
-QuerySearch search returns a iterator that traverse through the node tree from given node and passes nodes that matches the given selector.  
-*/ 
+QuerySearch search returns a iterator that traverse through the node tree from given node and passes nodes that matches the given selector.
+*/
 func QuerySearch(node *Node, selector string) iter.Seq[*Node] {
 	traverser := NewTraverser(node)
 	return func(yield func(node *Node) bool) {
 		selectorTokens := TokenizeSelectorsAndCombinators(selector)
-		iter := traverser.Walkthrough
-		for node := range iter {
+		for node := range traverser.Walkthrough {
 			if matchFromRightMostSelectors(node, selectorTokens) && !yield(node) {
 				return
 			}
@@ -127,7 +126,6 @@ func matchFromRightMostSelectors(node *Node, selectorTokens []CombinatorEl) bool
 	}
 	return node != nil
 }
-
 
 // QuerySelector returns the first node that matches with the selector from the node.
 func (node *Node) QuerySelector(selector string) *Node {
@@ -148,4 +146,3 @@ func (node *Node) QuerySelectorAll(selector string) NodeList {
 	}
 	return nodeList
 }
-
