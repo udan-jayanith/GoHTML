@@ -2,6 +2,7 @@ package GoHtml
 
 import (
 	"strings"
+
 	"golang.org/x/net/html"
 )
 
@@ -13,8 +14,8 @@ const (
 	Tag
 )
 
-//Selector struct represents a single css selector
-//Ex: .my-class, #video, div
+// Selector struct represents a single css selector
+// Ex: .my-class, #video, div
 type Selector struct {
 	selector     string
 	selectorName string
@@ -42,8 +43,8 @@ func matchNode(node *Node, basicSelectorName string, basicSelectorType BasicSele
 	return false
 }
 
-//NewSelector takes a single css selector and returns a Selector struct.
-//Selector string should be only of basic selector.
+// NewSelector takes a single css selector and returns a Selector struct.
+// Selector string should be only of basic selector.
 func NewSelector(selector string) Selector {
 	selector = strings.TrimSpace(html.EscapeString(selector))
 	selectorStruct := Selector{}
@@ -60,7 +61,7 @@ func NewSelector(selector string) Selector {
 		selectorStruct.selectorType = Tag
 	}
 
-	selectorStruct.selector = strings.ToLower(selector)
+	//selectorStruct.selector = strings.ToLower(selector)
 	if selectorStruct.selectorType != Tag {
 		selectorStruct.selectorName = selector[1:]
 	} else {
@@ -80,26 +81,26 @@ const (
 	NoneCombinator
 )
 
-//CombinatorEl is used to represent selectors that are around a combinator.
+// CombinatorEl is used to represent selectors that are around a combinator.
 type CombinatorEl struct {
 	Type      Combinator
 	Selector1 Selector
 	Selector2 Selector
 }
 
-//This takes a selector or combinators and selectors and then returns a slice of CombinatorEl.
+// This takes a selector or combinators and selectors and then returns a slice of CombinatorEl.
 func TokenizeSelectorsAndCombinators(selector string) []CombinatorEl {
 	iter := func(yield func(string) bool) {
 		currentStr := ""
 		for _, char := range selector {
 			switch char {
 			case ' ', '>', '+', '~':
-				if !yield(currentStr) || !yield(string(char)){
+				if !yield(currentStr) || !yield(string(char)) {
 					return
 				}
 				currentStr = ""
 			default:
-				currentStr+=string(char)
+				currentStr += string(char)
 			}
 		}
 		yield(currentStr)
@@ -167,6 +168,7 @@ func (ce *CombinatorEl) getDescended(node *Node) *Node {
 		if matchNode(parentNode, ce.Selector1.selectorName, ce.Selector1.selectorType) {
 			return parentNode
 		}
+
 		parentNode = parentNode.GetParent()
 	}
 	return nil

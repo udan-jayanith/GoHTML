@@ -52,5 +52,6 @@ func ExampleDecode() {
 		title = titleNode.GetInnerText()
 	}
 	fmt.Println(title)
-	//Output: User Profile
+	//Output: 
+	//User Profile
 }

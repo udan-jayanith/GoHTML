@@ -31,3 +31,14 @@ func TestFetchPostCovers(t *testing.T){
 	}
 	t.Log(time.Since(tim).Seconds())
 }
+
+func toNodeTree(url string) *GoHtml.Node{
+	res, err := http.Get(url)
+	if err != nil || res.StatusCode != http.StatusOK{
+		return nil
+	}
+	defer res.Body.Close()
+
+	rootNode, _ := GoHtml.Decode(res.Body)
+	return rootNode
+}
