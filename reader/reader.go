@@ -60,10 +60,13 @@ func (rd *Reader) fill() {
 		}
 		count++
 	}
+
+	rd.byteReads += rd.w
 	if count == rd.maxEmptyConsecutiveReads {
 		rd.err = ReachedMaxConsecutiveEmptyReads
+	} else if rd.byteReads >= rd.maxByteReads && rd.maxByteReads != -1 {
+		rd.err = ReachedMaxBytesRead
 	}
-	rd.byteReads += rd.w
 }
 
 type Iter struct {
