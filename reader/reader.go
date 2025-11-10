@@ -22,7 +22,8 @@ const (
 )
 
 var (
-	ReachedMaxBytesRead error = errors.New("Reached max bytes read")
+	ReachedMaxBytesRead             error = errors.New("Reached max bytes read")
+	ReachedMaxConsecutiveEmptyReads error = errors.New("Reached max consecutive empty reads")
 )
 
 // maxByteReads = -1 for no limit.
@@ -42,6 +43,8 @@ func NewReader(r io.Reader) *Reader {
 func (rd *Reader) fill() {
 	if rd.r != rd.w {
 		panic("Must first read available all the data before calling fill.")
+	} else if rd.err != nil {
+		return
 	}
 
 	count := 1
@@ -58,7 +61,7 @@ func (rd *Reader) fill() {
 		count++
 	}
 	if count == rd.maxEmptyConsecutiveReads {
-		rd.err = io.EOF
+		rd.err = ReachedMaxConsecutiveEmptyReads
 	}
 	rd.byteReads += rd.w
 }
@@ -92,4 +95,8 @@ func (iter *Iter) Loop() iter.Seq[byte] {
 			iter.rd.r++
 		}
 	}
+}
+
+func (rd *Reader) Iter() Iter {
+	return NewIter(rd)
 }

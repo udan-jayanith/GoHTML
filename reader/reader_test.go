@@ -30,7 +30,9 @@ func Test_Iter_Loop(t *testing.T) {
 		t.Fatal("Expected", input, "but got", accumulatedStr)
 	}
 }
-func Test_Iter_NoneEOF_error_early(t *testing.T) {}
+func Test_Iter_NoneEOF_error(t *testing.T) {
+
+}
 
 func Test_Iter_ByteReadsExceed(t *testing.T) {}
 
