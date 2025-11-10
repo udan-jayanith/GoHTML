@@ -87,6 +87,7 @@ func (iter *Iter) Loop() iter.Seq[byte] {
 			}
 
 			if !yield(iter.rd.buf[iter.rd.r]) {
+				iter.rd.r++
 				break
 			}
 			iter.rd.r++
