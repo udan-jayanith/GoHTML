@@ -1,58 +1,87 @@
 package GoHtml
-
 import (
+	"bufio"
 	"io"
-	"strings"
 
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 	"golang.org/x/net/html"
 )
 
+type TokenType = html.TokenType
+
+const (
+	// ErrorToken means that an error occurred during tokenization.
+	ErrorToken TokenType = html.ErrorToken
+	// TextToken means a text node.
+	TextToken = html.TextToken
+	// A StartTagToken looks like <a>.
+	StartTagToken = html.StartTagToken
+	// An EndTagToken looks like </a>.
+	EndTagToken = html.EndTagToken
+	// A SelfClosingTagToken tag looks like <br/>.
+	SelfClosingTagToken = html.SelfClosingTagToken
+	// A CommentToken looks like <!--x-->.
+	CommentToken = html.CommentToken
+	// A DoctypeToken looks like <!DOCTYPE x>
+	DoctypeToken = html.DoctypeToken
+)
+
+type Attribute struct {
+	Key, Val string
+}
+
+type Token struct {
+	Type TokenType
+	Data string
+	Attr []Attribute
+}
+
 // Tokenizer contains a *html.Tokenizer.
 type Tokenizer struct {
-	z *html.Tokenizer
+	rd      *bufio.Reader
+	buf     []byte
+	readBuf []byte
 }
 
 // NewTokenizer returns a new Tokenizer.
 func NewTokenizer(r io.Reader) Tokenizer {
 	return Tokenizer{
-		z: html.NewTokenizer(r),
+		rd:      bufio.NewReader(r),
+		buf:     make([]byte, 0, 32),
+		readBuf: make([]byte, 0, 32),
 	}
+}
+
+func (t *Tokenizer) Token() Token {
+	panic("Not implemented")
+	return Token{}
 }
 
 // Advanced scans the next token and returns its type.
-func (t *Tokenizer) Advanced() html.TokenType {
-	return t.z.Next()
+func (t *Tokenizer) Advanced() TokenType {
+	//return t.z.Next()
+	panic("Not implemented")
+	return ErrorToken
 }
 
-// CurrentNode returns the current node.
-// Returned value can be nil regardless of token type.
-func (t *Tokenizer) GetCurrentNode() *Node {
-	currentToken := t.z.Token()
-	if strings.TrimSpace(currentToken.Data) == "" {
-		return nil
-	}
-
-	// token data depend on the token type.
-	switch currentToken.Type {
-	case html.DoctypeToken, html.StartTagToken, html.SelfClosingTagToken, html.TextToken:
-		var node *Node
-		switch currentToken.Type {
-		case html.TextToken:
-			node = CreateTextNode(currentToken.Data)
-		case html.DoctypeToken:
-			node = CreateNode(DOCTYPEDTD)
-			node.SetAttribute(currentToken.Data, "")
-		default:
-			node = CreateNode(currentToken.Data)
-			for _, v := range currentToken.Attr {
-				node.SetAttribute(v.Key, v.Val)
-			}
+// Tags, closingTags and comments are enclosed by < >.
+func (t *Tokenizer) scan() {
+	buffer := make([]byte, 1024)
+	for {
+		buf := make([]byte, 1024)
+		n, err := t.rd.Read(buf)
+		//handle the error
+		if err != nil {
+			break
 		}
-		return node
+
+		for i := 0; i < n; i++ {
+			byt := t.bytesBuf[i]
+
+		}
 	}
-	return nil
 }
+
 
 // NodeTreeBuilder is used to build a node tree given a node and it's type.
 type NodeTreeBuilder struct {
