@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	Reader "github.com/udan-jayanith/GoHTML/reader"
+	Reader "github.com/udan-jayanith/GoHTML/internal/reader"
 )
 
 //Test Loop.
