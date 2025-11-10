@@ -93,7 +93,7 @@ func (iter *Iter) Loop() iter.Seq[byte] {
 			iter.rd.r++
 
 			bytesRead++
-			if bytesRead >= iter.rd.readBytes {
+			if bytesRead >= iter.rd.readBytes && iter.rd.readBytes != 1 {
 				iter.Err = ReachedMaxBytesRead
 				break
 			}
