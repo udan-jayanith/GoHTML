@@ -66,4 +66,21 @@ func Test_Iter_Loop_BreakEarly(t *testing.T) {
 	}
 }
 
-func Test_Iter_ExceedMinimumEmptyReads(t *testing.T) {}
+type emptyReads struct {
+}
+
+func (rc *emptyReads) Read(p []byte) (int, error) {
+	return 0, nil
+}
+
+func Test_Iter_ExceedMinimumEmptyReads(t *testing.T) {
+	rd := Reader.NewReader(&emptyReads{})
+	iter := rd.Iter()
+	for byt := range iter.Loop() {
+		t.Fatal("Byte read", byt, "but expected not byte reads")
+	}
+
+	if iter.Err != Reader.ReachedMaxConsecutiveEmptyReads {
+		t.Fatal("Expected error", Reader.ReachedMaxConsecutiveEmptyReads, "but got", iter.Err)
+	}
+}

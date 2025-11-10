@@ -47,8 +47,8 @@ func (rd *Reader) fill() {
 		return
 	}
 
-	count := 1
-	for count <= rd.maxEmptyConsecutiveReads {
+	count := 0
+	for count < rd.maxEmptyConsecutiveReads {
 		n, err := rd.reader.Read(rd.buf)
 		rd.w = n
 		rd.r = 0
