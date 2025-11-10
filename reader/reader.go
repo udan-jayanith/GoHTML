@@ -75,7 +75,7 @@ func NewIter(rd *Reader) Iter {
 }
 
 func (iter *Iter) Loop() iter.Seq[byte] {
-	return func(yield func(byte) bool) {
+	return func(yield func(byt byte) bool) {
 		bytesRead := 0
 		for {
 			if iter.rd.w == iter.rd.r {
