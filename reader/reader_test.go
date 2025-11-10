@@ -43,10 +43,27 @@ func Test_Iter_ByteReadsExceed(t *testing.T) {
 	if accumulatedStr != "Hello" {
 		t.Fatal("Expected 'Hello' but got", accumulatedStr)
 	} else if iter.Err != Reader.ReachedMaxBytesRead {
-		t.Fatal("Expected", Reader.ReachedMaxBytesRead, "but got", iter.Err)
+		t.Fatal("Expected", Reader.ReachedMaxBytesRead, "but got", iter.Err.Error())
 	}
 }
 
-func Test_Iter_Loop_BreakEarly(t *testing.T) {}
+func Test_Iter_Loop_BreakEarly(t *testing.T) {
+	rd := Reader.NewReader(strings.NewReader("Hello world"))
+	iter := rd.Iter()
+
+	accumulatedStr := ""
+	for byt := range iter.Loop() {
+		if accumulatedStr == "Hello" {
+			break
+		}
+		accumulatedStr += string(byt)
+	}
+
+	if iter.Err != nil {
+		t.Fatal("Expected no error but got", iter.Err.Error())
+	} else if accumulatedStr != "Hello" {
+		t.Fatal("Expected 'Hello' but got", accumulatedStr)
+	}
+}
 
 func Test_Iter_ExceedMinimumEmptyReads(t *testing.T) {}
