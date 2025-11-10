@@ -84,3 +84,22 @@ func Test_Iter_ExceedMinimumEmptyReads(t *testing.T) {
 		t.Fatal("Expected error", Reader.ReachedMaxConsecutiveEmptyReads, "but got", iter.Err)
 	}
 }
+
+func Test_Reader_FullBufferReads(t *testing.T) {
+	rd := Reader.NewReaderConfigured(strings.NewReader("Hello world"), 2, Reader.DefaultMaxConsecutiveEmptyReads, Reader.DefaultByteReads)
+	iter := rd.Iter()
+
+	accumulatedString := ""
+	for byt := range iter.Loop() {
+		if byt == 0 {
+			t.Fatal("Expected no zero value bytes")
+		}
+		accumulatedString += string(byt)
+	}
+
+	if accumulatedString != "Hello world" {
+		t.Fatal("Expected accumulatedString to be 'Hello world' but got", accumulatedString)
+	} else if iter.Err != io.EOF {
+		t.Fatal("Expected error io.EOF but got", iter.Err.Error())
+	}
+}

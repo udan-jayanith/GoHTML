@@ -86,6 +86,7 @@ func (iter *Iter) Loop() iter.Seq[byte] {
 			if iter.rd.w == iter.rd.r {
 				iter.rd.fill()
 			}
+			
 			if iter.rd.w == iter.rd.r {
 				iter.Err = iter.rd.err
 				break
