@@ -8,35 +8,35 @@ import (
 
 type Reader struct {
 	buf                      []byte
-	r, w                     int //read and write bytes.
+	r, w                     int //read and written bytes.
 	reader                   io.Reader
 	maxEmptyConsecutiveReads int
 	err                      error
-	readBytes                int
+	maxByteReads, byteReads  int
 }
 
 const (
 	DefaultBufSize                  int = 1024
 	DefaultMaxConsecutiveEmptyReads int = 100
-	DefaultReadBytes                int = -1
+	DefaultByteReads                int = -1
 )
 
 var (
-	ReachedMaxBytesRead error = errors.New("Reach max bytes read")
+	ReachedMaxBytesRead error = errors.New("Reached max bytes read")
 )
 
-// readBytes = -1 for no limit.
-func NewReaderConfigured(r io.Reader, bufferSize, maxEmptyConsecutiveReads int, readBytes int) *Reader {
+// maxByteReads = -1 for no limit.
+func NewReaderConfigured(r io.Reader, bufferSize, maxEmptyConsecutiveReads int, maxByteReads int) *Reader {
 	return &Reader{
 		buf:                      make([]byte, bufferSize),
 		reader:                   r,
 		maxEmptyConsecutiveReads: maxEmptyConsecutiveReads,
-		readBytes:                readBytes,
+		maxByteReads:             maxByteReads,
 	}
 }
 
 func NewReader(r io.Reader) *Reader {
-	return NewReaderConfigured(r, DefaultBufSize, DefaultMaxConsecutiveEmptyReads, DefaultReadBytes)
+	return NewReaderConfigured(r, DefaultBufSize, DefaultMaxConsecutiveEmptyReads, DefaultByteReads)
 }
 
 func (rd *Reader) fill() {
@@ -60,7 +60,7 @@ func (rd *Reader) fill() {
 	if count == rd.maxEmptyConsecutiveReads {
 		rd.err = io.EOF
 	}
-	rd.readBytes += rd.w
+	rd.byteReads += rd.w
 }
 
 type Iter struct {
@@ -76,7 +76,6 @@ func NewIter(rd *Reader) Iter {
 
 func (iter *Iter) Loop() iter.Seq[byte] {
 	return func(yield func(byt byte) bool) {
-		bytesRead := 0
 		for {
 			if iter.rd.w == iter.rd.r {
 				iter.rd.fill()
@@ -91,12 +90,6 @@ func (iter *Iter) Loop() iter.Seq[byte] {
 				break
 			}
 			iter.rd.r++
-
-			bytesRead++
-			if bytesRead >= iter.rd.readBytes && iter.rd.readBytes != 1 {
-				iter.Err = ReachedMaxBytesRead
-				break
-			}
 		}
 	}
 }
