@@ -4,6 +4,9 @@ GoHTML is an open source project.
 
 It might be the work of hundreds of contributors. We appreciate your help!
 
+## Contributing code
+User must create a branch that matches this pattern `` users/**/* `` and should make a PR.
+
 ## Before filing an issue
 
 If you are sure you have found a bug and the behavior you are seeing is confirmed as a bug or issue, it can easily be re-raised in the issue tracker.
