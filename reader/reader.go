@@ -25,6 +25,7 @@ var (
 	ReachedMaxBytesRead error = errors.New("Reach max bytes read")
 )
 
+// readBytes = -1 for no limit.
 func NewReaderConfigured(r io.Reader, bufferSize, maxEmptyConsecutiveReads int, readBytes int) *Reader {
 	return &Reader{
 		buf:                      make([]byte, bufferSize),
@@ -67,9 +68,9 @@ type Iter struct {
 	rd  *Reader
 }
 
-func (rd *Iter) Iter() Iter {
+func NewIter(rd *Reader) Iter {
 	return Iter{
-		rd: rd.rd,
+		rd: rd,
 	}
 }
 
