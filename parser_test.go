@@ -27,6 +27,15 @@ func TestDecode(t *testing.T) {
 	GoHtml.Encode(&builder, node)
 }
 
+func TestDecodeWithAEmptyReader(t *testing.T) {
+	node, err := GoHtml.Decode(strings.NewReader(""))
+	if err == nil {
+		t.Fatal("Expected a error but got no error")
+	} else if node != nil {
+		t.Fatal("Expected node to be nil but got a Node")
+	}
+}
+
 func ExampleDecode() {
 	r := strings.NewReader(`
 	<!DOCTYPE html>
@@ -52,6 +61,6 @@ func ExampleDecode() {
 		title = titleNode.GetInnerText()
 	}
 	fmt.Println(title)
-	//Output: 
+	//Output:
 	//User Profile
 }

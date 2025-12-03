@@ -14,6 +14,7 @@ type Tokenizer struct {
 }
 
 // NewTokenizer returns a new Tokenizer.
+// r must not be nil
 func NewTokenizer(r io.Reader) Tokenizer {
 	return Tokenizer{
 		z: html.NewTokenizer(r),

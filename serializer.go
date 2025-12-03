@@ -23,9 +23,10 @@ func encodeListAttributes(node *Node) string {
 }
 
 // Encode writes to w encoding of the node tree from rootNode.
-func Encode(w io.Writer, rootNode *Node) {
+// w must not be nil
+func Encode(w io.Writer, rootNode *Node) error {
 	if rootNode == nil {
-		return
+		return NoNodesFound
 	}
 
 	type stackFrame struct {
@@ -43,12 +44,18 @@ func Encode(w io.Writer, rootNode *Node) {
 		currentStackFrame := v.(stackFrame)
 
 		if currentStackFrame.isClosingTag {
-			fmt.Fprintf(w, "</%s>", currentStackFrame.node.GetTagName())
+			_, err := fmt.Fprintf(w, "</%s>", currentStackFrame.node.GetTagName())
+			if err != nil {
+				return err
+			}
 			continue
 		} else if currentStackFrame.node.IsTextNode() {
-			fmt.Fprint(w, html.EscapeString(currentStackFrame.node.GetText()))
+			_, err := fmt.Fprint(w, html.EscapeString(currentStackFrame.node.GetText()))
+			if err != nil {
+				return err
+			}
 		} else {
-			fmt.Fprintf(w, "<%s%s>", func() string {
+			_, err := fmt.Fprintf(w, "<%s%s>", func() string {
 				tagName := currentStackFrame.node.GetTagName()
 				tagNameUpperCased := strings.ToUpper(tagName)
 				if tagNameUpperCased == DOCTYPEDTD {
@@ -56,6 +63,9 @@ func Encode(w io.Writer, rootNode *Node) {
 				}
 				return tagName
 			}(), encodeListAttributes(currentStackFrame.node))
+			if err != nil {
+				return err
+			}
 		}
 
 		if currentStackFrame.node.GetNextNode() != nil {
@@ -63,7 +73,7 @@ func Encode(w io.Writer, rootNode *Node) {
 				node: currentStackFrame.node.GetNextNode(),
 			})
 		}
-		if !IsVoidTag(currentStackFrame.node.GetTagName()) && !currentStackFrame.node.IsTextNode(){
+		if !IsVoidTag(currentStackFrame.node.GetTagName()) && !currentStackFrame.node.IsTextNode() {
 			stack.Push(stackFrame{
 				node:         currentStackFrame.node,
 				isClosingTag: true,
@@ -75,6 +85,7 @@ func Encode(w io.Writer, rootNode *Node) {
 			})
 		}
 	}
+	return nil
 }
 
 // NodeTreeToHTML returns encoding of node-tree as a string.
