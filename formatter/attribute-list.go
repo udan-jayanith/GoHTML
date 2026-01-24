@@ -39,11 +39,12 @@ func tokenize_kv_attr(attr []html.Attribute) iter.Seq[string] {
 	}
 }
  
-func format_attribute_list(iterator iter.Seq[string], maintain_bytes_per_line int, end EOL, buf *bytes.Buffer) {
+func format_attribute_list(iterator iter.Seq[string], options *FormatOptions, tab string, buf *bytes.Buffer) {
 	var line_length int = 0
 	for attribute := range iterator {
-		if line_length >= maintain_bytes_per_line {
-			buf.Write([]byte(end))
+		if line_length >= options.CharLenPerLine {
+			buf.WriteString(options.LineEnding)
+			buf.WriteString(tab)
 			line_length = 0
 		}
 

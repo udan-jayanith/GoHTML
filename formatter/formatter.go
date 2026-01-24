@@ -31,7 +31,7 @@ type FormatOptions struct {
 	// Line ending
 	LineEnding EOL
 	// CharLenPerLine tries to maintain CharLenPerLine amount of bytes per line when formatting.
-	CharLenPerLine uint
+	CharLenPerLine int
 }
 
 var (
@@ -47,6 +47,10 @@ type format_reader struct {
 	format_options FormatOptions
 	buf            bytes.Buffer
 	last_token     html.Token
+	
+	indentation string
+	// formatting buffer is a buffer use for string manipulation. This exists here to reduce memory reallocation.
+	formatting_buf bytes.Buffer
 }
 
 func (fr *format_reader) Read(b []byte) (n int, err error) {
@@ -65,11 +69,15 @@ func (fr *format_reader) Read(b []byte) (n int, err error) {
 		var str string
 		switch fr.last_token.Type {
 		// StartTagToken, SelfClosingTagToken, DoctypeToken and EndTagToken cloud have attributes
+		// StartingTagToken increases indentation level
+		// EndTagToken decreases indentation level
 		case html.StartTagToken, html.SelfClosingTagToken, html.EndTagToken, html.DoctypeToken:
 			tag_name := strings.ToLower(fr.last_token.Data)
-			iterator := tokenize_kv_attr(fr.last_token.Attr)
+			format_attribute_list(tokenize_kv_attr(fr.last_token.Attr), &fr.format_options, "\t", &fr.formatting_buf)
+			
 			switch fr.last_token.Type {
-			case html.StartTagToken, html.SelfClosingTagToken:
+			case html.StartTagToken:
+			case html.SelfClosingTagToken:
 			case html.EndTagToken:
 			case html.DoctypeToken:
 				// Make doctype tags tag name uppercase
@@ -97,8 +105,10 @@ func (options *FormatOptions) Format(r io.Reader) (io.Reader, error) {
 	return &format_reader{
 		tokenizer:      t,
 		format_options: *options,
+		indentation: options.Tab,
 		buf:            *bytes.NewBufferString(""),
 		last_token:     t.Token(),
+		formatting_buf: *bytes.NewBuffer(make([]byte, 0, 256)),
 	}, nil
 }
 
