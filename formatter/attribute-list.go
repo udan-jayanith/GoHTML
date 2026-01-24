@@ -1,6 +1,7 @@
 package Formatter
 
 import (
+	"bytes"
 	"fmt"
 	"iter"
 	"strings"
@@ -17,7 +18,7 @@ func format_kv(key, value string) (str string) {
 	return str
 }
 
-func tokenize_kv_map(iterator map[string]string) iter.Seq[string] {
+func tokenize_kv_node(iterator map[string]string) iter.Seq[string] {
 	return func(yield func(string) bool) {
 		for k, v := range iterator {
 			if !yield(format_kv(k, v)) {
@@ -27,7 +28,7 @@ func tokenize_kv_map(iterator map[string]string) iter.Seq[string] {
 	}
 }
 
-func tokenize_kv_attr(attr []html.Attribute) iter.Seq[string]{
+func tokenize_kv_attr(attr []html.Attribute) iter.Seq[string] {
 	return func(yield func(string) bool) {
 		for _, pair := range attr {
 			k, v := pair.Key, pair.Val
@@ -37,8 +38,22 @@ func tokenize_kv_attr(attr []html.Attribute) iter.Seq[string]{
 		}
 	}
 }
+ 
+func format_attribute_list(iterator iter.Seq[string], maintain_bytes_per_line int, end EOL, buf *bytes.Buffer) {
+	var line_length int = 0
+	for attribute := range iterator {
+		if line_length >= maintain_bytes_per_line {
+			buf.Write([]byte(end))
+			line_length = 0
+		}
 
-func format_attribute_list(iterator iter.Seq[string], byte_per_line uint, end EOL) string {
-	var str string
-	
+		if line_length == 0 {
+			buf.WriteString(attribute)
+		} else {
+			buf.WriteString(" ")
+			buf.WriteString(attribute)
+			line_length++
+		}
+		line_length += len(attribute)
+	}
 }
