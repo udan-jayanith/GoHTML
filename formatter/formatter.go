@@ -30,8 +30,8 @@ type FormatOptions struct {
 	Tab string
 	// Line ending
 	LineEnding EOL
-	// CharLenPerLine tries to maintain CharLenPerLine amount of bytes per line when formatting.
-	CharLenPerLine int
+	// LineLength tries to maintain LineLength amount of bytes per line when formatting.
+	LineLength int
 }
 
 var (
@@ -39,6 +39,7 @@ var (
 		AutoWrapText: true,
 		Tab:          "\t",
 		LineEnding:   LF,
+		LineLength:   70,
 	}
 )
 
@@ -54,8 +55,9 @@ type format_reader struct {
 	// formatting buffer is a buffer use for string manipulation. This exists here to reduce memory reallocation.
 	// use write_eol_to_formatting_buf if writing a eol line. Other wise use write_string_to_formatting_buf.
 	// This is because format_reader needs to know is the last write is an eol.
-	formatting_buf    bytes.Buffer
-	is_last_write_eol bool
+	formatting_buf      bytes.Buffer
+	is_last_write_eol   bool
+	current_line_length int
 }
 
 func (fr *format_reader) increment_indentation() {
@@ -74,36 +76,59 @@ func (fr *format_reader) decrement_indentation() {
 // This interface is used for managing indentation and last eol.
 type formatting_buf_writers interface {
 	write_string_to_formatting_buf(str string)
+	// write_eol_to_formatting_buf ends the line and add indentation.
 	write_eol_to_formatting_buf()
+	// try_write_new_line_to_formatting_buf does not tries to break str and if (line length) + len(str) is too long this will write str into a new line.
+	try_write_new_line_to_formatting_buf(str string)
+	// formatting_buf_line_length returns the current line length
+	formatting_buf_line_length() int
+	// formatting_buf_is_last_write_eol returns whether the last write used write_eol_to_formatting_buf.
+	formatting_buf_is_last_write_eol() bool
 }
 
 // This also adds appropriate indentations.
 func (fr *format_reader) write_eol_to_formatting_buf() {
 	fr.formatting_buf.WriteString(fr.format_options.LineEnding)
 	fr.formatting_buf.WriteString(fr.indentation)
+
 	fr.is_last_write_eol = true
+	fr.current_line_length = len(fr.format_options.LineEnding) + len(fr.indentation)
 }
 
-// TODO: make this handle indentation.
 func (fr *format_reader) write_string_to_formatting_buf(str string) {
 	fr.formatting_buf.WriteString(str)
 	fr.is_last_write_eol = false
+	fr.current_line_length += len(str)
+}
+
+func (fr *format_reader) try_write_new_line_to_formatting_buf(str string) {
+	if fr.current_line_length+len(str) >= fr.format_options.LineLength {
+		fr.write_eol_to_formatting_buf()
+	}
+	fr.write_string_to_formatting_buf(str)
+}
+
+func (fr *format_reader) formatting_buf_line_length() int {
+	return fr.current_line_length
+}
+
+func (fr *format_reader) formatting_buf_is_last_write_eol() bool {
+	return fr.is_last_write_eol
 }
 
 func (fr *format_reader) Read(b []byte) (n int, err error) {
 	for {
-		if fr.buf.Len() > 0 {
+		if fr.buf.Len() > 0 && len(b) > n {
 			n1, _ := fr.buf.Read(b[n:])
 			n += n1
 		}
 
-		if len(b) == n || fr.buf.Len() > 0 && n > 0 {
+		if len(b) == n || n > 0 {
 			return n, nil
 		} else if fr.last_token.Type == html.ErrorToken && fr.buf.Len() == 0 {
 			return n, io.EOF
 		}
 
-		var str string
 		switch fr.last_token.Type {
 		// StartTagToken, SelfClosingTagToken, DoctypeToken and EndTagToken could have attributes
 		// StartingTagToken increases indentation level
@@ -113,37 +138,42 @@ func (fr *format_reader) Read(b []byte) (n int, err error) {
 
 			switch fr.last_token.Type {
 			case html.EndTagToken:
-				fr.formatting_buf.WriteString("</" + tag_name)
-				fr.decrement_indentation()
+				if !fr.formatting_buf_is_last_write_eol() {
+					fr.write_eol_to_formatting_buf()
+				}
+				fr.write_string_to_formatting_buf("</" + tag_name)
 			case html.DoctypeToken:
 				tag_name = strings.ToUpper(tag_name)
-				fr.formatting_buf.WriteString("<" + tag_name)
+				if !fr.formatting_buf_is_last_write_eol() {
+					fr.write_eol_to_formatting_buf()
+				}
+				fr.write_string_to_formatting_buf("<" + tag_name)
 			default:
-				fr.formatting_buf.WriteString("<" + tag_name)
+				if !fr.formatting_buf_is_last_write_eol() {
+					fr.write_eol_to_formatting_buf()
+				}
+				fr.write_string_to_formatting_buf("<" + tag_name)
 			}
 
-			if len(fr.last_token.Attr) > 0 {
-				fr.formatting_buf.WriteString(" ")
-				format_attribute_list(tokenize_kv_attr(fr.last_token.Attr), fr.format_options.CharLenPerLine, fr)
-			}
+			format_attribute_list(tokenize_kv_attr(fr.last_token.Attr), fr.format_options.LineLength, fr)
+			fr.write_string_to_formatting_buf(">")
 
 			if fr.last_token.Type == html.StartTagToken {
 				fr.increment_indentation()
+			} else if fr.last_token.Type == html.EndTagToken {
+				fr.decrement_indentation()
 			}
-			fr.formatting_buf.WriteString(">")
 		case html.TextToken:
 			if !fr.format_options.AutoWrapText {
 				break
 			}
+			// if data >= line length*2 start writing text in a new line and end in a new line. 
 			panic("Not implemented")
 		case html.CommentToken:
-			//Alway put comments on a new line
+			//Alway put comments on a new line and end in a new line.
 		}
 
-		_, err := fr.buf.WriteString(str)
-		if err != nil {
-			return 0, err
-		}
+		fr.buf.Write(fr.formatting_buf.Bytes())
 		fr.last_token = fr.tokenizer.Token()
 	}
 }

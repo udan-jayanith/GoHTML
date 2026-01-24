@@ -38,20 +38,16 @@ func tokenize_kv_attr(attr []html.Attribute) iter.Seq[string] {
 	}
 }
 
-func format_attribute_list(iterator iter.Seq[string], bytes_per_line int, buf formatting_buf_writers) {
-	var line_length int = 0
+// This will add appropriate spacing to behind of attributes.
+func format_attribute_list(iterator iter.Seq[string], line_length int, buf formatting_buf_writers) {
 	for attribute := range iterator {
-		if line_length >= bytes_per_line {
+		if buf.formatting_buf_is_last_write_eol() {
+			buf.write_string_to_formatting_buf(attribute)
+		} else if buf.formatting_buf_line_length()+len(attribute) >= line_length {
 			buf.write_eol_to_formatting_buf()
-			line_length = 0
-		}
-
-		if line_length == 0 {
 			buf.write_string_to_formatting_buf(attribute)
 		} else {
 			buf.write_string_to_formatting_buf(" " + attribute)
-			line_length++
 		}
-		line_length += len(attribute)
 	}
 }
