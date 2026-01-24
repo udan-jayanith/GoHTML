@@ -46,15 +46,15 @@ type format_reader struct {
 	tokenizer      *html.Tokenizer
 	format_options FormatOptions
 	// need a buf to hold processed strings for Reading.
-	buf            bytes.Buffer
-	last_token     html.Token
+	buf        bytes.Buffer
+	last_token html.Token
 
-	// indentation must be a empty string when initializing format_reader unless need margin to the left.  
+	// indentation must be a empty string when initializing format_reader unless need margin to the left.
 	indentation string
 	// formatting buffer is a buffer use for string manipulation. This exists here to reduce memory reallocation.
 	// use write_eol_to_formatting_buf if writing a eol line. Other wise use write_string_to_formatting_buf.
-	// This is because format_reader needs to know is the last write is an eol. 
-	formatting_buf bytes.Buffer
+	// This is because format_reader needs to know is the last write is an eol.
+	formatting_buf    bytes.Buffer
 	is_last_write_eol bool
 }
 
@@ -71,11 +71,20 @@ func (fr *format_reader) decrement_indentation() {
 	fr.indentation = fr.indentation[:l]
 }
 
+// This interface is used for managing indentation and last eol.
+type formatting_buf_writers interface {
+	write_string_to_formatting_buf(str string)
+	write_eol_to_formatting_buf()
+}
+
+// This also adds appropriate indentations.
 func (fr *format_reader) write_eol_to_formatting_buf() {
 	fr.formatting_buf.WriteString(fr.format_options.LineEnding)
+	fr.formatting_buf.WriteString(fr.indentation)
 	fr.is_last_write_eol = true
 }
 
+// TODO: make this handle indentation.
 func (fr *format_reader) write_string_to_formatting_buf(str string) {
 	fr.formatting_buf.WriteString(str)
 	fr.is_last_write_eol = false
@@ -115,7 +124,7 @@ func (fr *format_reader) Read(b []byte) (n int, err error) {
 
 			if len(fr.last_token.Attr) > 0 {
 				fr.formatting_buf.WriteString(" ")
-				format_attribute_list(tokenize_kv_attr(fr.last_token.Attr), &fr.format_options, fr.indentation, &fr.formatting_buf)
+				format_attribute_list(tokenize_kv_attr(fr.last_token.Attr), fr.format_options.CharLenPerLine, fr)
 			}
 
 			if fr.last_token.Type == html.StartTagToken {

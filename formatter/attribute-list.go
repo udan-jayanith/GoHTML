@@ -1,7 +1,6 @@
 package Formatter
 
 import (
-	"bytes"
 	"fmt"
 	"iter"
 	"strings"
@@ -38,21 +37,19 @@ func tokenize_kv_attr(attr []html.Attribute) iter.Seq[string] {
 		}
 	}
 }
- 
-func format_attribute_list(iterator iter.Seq[string], options *FormatOptions, tab string, buf *bytes.Buffer) {
+
+func format_attribute_list(iterator iter.Seq[string], bytes_per_line int, buf formatting_buf_writers) {
 	var line_length int = 0
 	for attribute := range iterator {
-		if line_length >= options.CharLenPerLine {
-			buf.WriteString(options.LineEnding)
-			buf.WriteString(tab)
+		if line_length >= bytes_per_line {
+			buf.write_eol_to_formatting_buf()
 			line_length = 0
 		}
 
 		if line_length == 0 {
-			buf.WriteString(attribute)
+			buf.write_string_to_formatting_buf(attribute)
 		} else {
-			buf.WriteString(" ")
-			buf.WriteString(attribute)
+			buf.write_string_to_formatting_buf(" " + attribute)
 			line_length++
 		}
 		line_length += len(attribute)
