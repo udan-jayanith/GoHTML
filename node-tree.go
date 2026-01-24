@@ -2,6 +2,7 @@ package GoHtml
 
 import (
 	"strings"
+	"iter"
 
 	"golang.org/x/net/html"
 )
@@ -79,11 +80,24 @@ func (node *Node) RemoveAttribute(attributeName string) {
 
 }
 
+// Deprecated: Should use Attributes method instead.
+// 
 // IterateAttributes calls callback at every attribute in the node by passing attribute and value of the node.
 func (node *Node) IterateAttributes(callback func(attribute, value string)) {
 	attributes := node.attributes
 	for k, v := range attributes {
 		callback(k, v)
+	}
+}
+
+// Attributes returns a iterator over attributes of the html tag.
+func (node *Node) Attributes() iter.Seq2[string, string] {
+	return func(yield func(k string, v string) bool) {
+		for k, v := range node.attributes {
+			if !yield(k, v) {
+				break
+			}
+		}
 	}
 }
 
