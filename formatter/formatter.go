@@ -167,10 +167,10 @@ func (fr *format_reader) Read(b []byte) (n int, err error) {
 			if !fr.format_options.AutoWrapText {
 				break
 			}
-			// if data >= line length*2 start writing text in a new line and end in a new line. 
+			// always write text in a new line and end in a new line.
 			panic("Not implemented")
 		case html.CommentToken:
-			//Alway put comments on a new line and end in a new line.
+			// always put comments on a new line and end in a new line.
 		}
 
 		fr.buf.Write(fr.formatting_buf.Bytes())
