@@ -45,12 +45,40 @@ var (
 type format_reader struct {
 	tokenizer      *html.Tokenizer
 	format_options FormatOptions
+	// need a buf to hold processed strings for Reading.
 	buf            bytes.Buffer
 	last_token     html.Token
-	
+
+	// indentation must be a empty string when initializing format_reader unless need margin to the left.  
 	indentation string
 	// formatting buffer is a buffer use for string manipulation. This exists here to reduce memory reallocation.
+	// use write_eol_to_formatting_buf if writing a eol line. Other wise use write_string_to_formatting_buf.
+	// This is because format_reader needs to know is the last write is an eol. 
 	formatting_buf bytes.Buffer
+	is_last_write_eol bool
+}
+
+func (fr *format_reader) increment_indentation() {
+	fr.indentation += fr.format_options.Tab
+}
+
+func (fr *format_reader) decrement_indentation() {
+	l := len(fr.indentation) - len(fr.format_options.Tab)
+	if l < 0 {
+		// TODO: Handle this with a error.
+		return
+	}
+	fr.indentation = fr.indentation[:l]
+}
+
+func (fr *format_reader) write_eol_to_formatting_buf() {
+	fr.formatting_buf.WriteString(fr.format_options.LineEnding)
+	fr.is_last_write_eol = true
+}
+
+func (fr *format_reader) write_string_to_formatting_buf(str string) {
+	fr.formatting_buf.WriteString(str)
+	fr.is_last_write_eol = false
 }
 
 func (fr *format_reader) Read(b []byte) (n int, err error) {
@@ -68,22 +96,37 @@ func (fr *format_reader) Read(b []byte) (n int, err error) {
 
 		var str string
 		switch fr.last_token.Type {
-		// StartTagToken, SelfClosingTagToken, DoctypeToken and EndTagToken cloud have attributes
+		// StartTagToken, SelfClosingTagToken, DoctypeToken and EndTagToken could have attributes
 		// StartingTagToken increases indentation level
 		// EndTagToken decreases indentation level
 		case html.StartTagToken, html.SelfClosingTagToken, html.EndTagToken, html.DoctypeToken:
 			tag_name := strings.ToLower(fr.last_token.Data)
-			format_attribute_list(tokenize_kv_attr(fr.last_token.Attr), &fr.format_options, "\t", &fr.formatting_buf)
-			
+
 			switch fr.last_token.Type {
-			case html.StartTagToken:
-			case html.SelfClosingTagToken:
 			case html.EndTagToken:
+				fr.formatting_buf.WriteString("</" + tag_name)
+				fr.decrement_indentation()
 			case html.DoctypeToken:
-				// Make doctype tags tag name uppercase
+				tag_name = strings.ToUpper(tag_name)
+				fr.formatting_buf.WriteString("<" + tag_name)
+			default:
+				fr.formatting_buf.WriteString("<" + tag_name)
 			}
+
+			if len(fr.last_token.Attr) > 0 {
+				fr.formatting_buf.WriteString(" ")
+				format_attribute_list(tokenize_kv_attr(fr.last_token.Attr), &fr.format_options, fr.indentation, &fr.formatting_buf)
+			}
+
+			if fr.last_token.Type == html.StartTagToken {
+				fr.increment_indentation()
+			}
+			fr.formatting_buf.WriteString(">")
 		case html.TextToken:
-			// Wrap the text if specified
+			if !fr.format_options.AutoWrapText {
+				break
+			}
+			panic("Not implemented")
 		case html.CommentToken:
 			//Alway put comments on a new line
 		}
@@ -105,7 +148,6 @@ func (options *FormatOptions) Format(r io.Reader) (io.Reader, error) {
 	return &format_reader{
 		tokenizer:      t,
 		format_options: *options,
-		indentation: options.Tab,
 		buf:            *bytes.NewBufferString(""),
 		last_token:     t.Token(),
 		formatting_buf: *bytes.NewBuffer(make([]byte, 0, 256)),
