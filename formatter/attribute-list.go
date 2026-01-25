@@ -17,7 +17,9 @@ func format_kv(key, value string) (str string) {
 	return str
 }
 
-func tokenize_kv_node(iterator map[string]string) iter.Seq[string] {
+type attribute_list = iter.Seq[string]
+
+func tokenize_kv_node(iterator map[string]string) attribute_list {
 	return func(yield func(string) bool) {
 		for k, v := range iterator {
 			if !yield(format_kv(k, v)) {
@@ -27,7 +29,7 @@ func tokenize_kv_node(iterator map[string]string) iter.Seq[string] {
 	}
 }
 
-func tokenize_kv_attr(attr []html.Attribute) iter.Seq[string] {
+func tokenize_kv_attr(attr []html.Attribute) attribute_list {
 	return func(yield func(string) bool) {
 		for _, pair := range attr {
 			k, v := pair.Key, pair.Val
@@ -39,7 +41,7 @@ func tokenize_kv_attr(attr []html.Attribute) iter.Seq[string] {
 }
 
 // This will add appropriate spacing to behind of attributes.
-func format_attribute_list(iterator iter.Seq[string], line_length int, buf formatting_buf_writers) {
+func format_attribute_list(iterator attribute_list, line_length int, buf formatting_buf_writers) {
 	for attribute := range iterator {
 		if buf.formatting_buf_is_last_write_eol() {
 			buf.write_string_to_formatting_buf(attribute)

@@ -5,5 +5,5 @@ import(
 )
 
 func (fr *format_reader) format_text(text string) {
-
+	
 }
