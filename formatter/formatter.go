@@ -48,11 +48,13 @@ func (options *FormatOptions) Format(r io.Reader) (io.Reader, error) {
 	}
 
 	t := html.NewTokenizer(r)
+	t.Next()
+	toke := t.Token()
 	return &format_reader{
 		tokenizer:      t,
 		format_options: *options,
 		buf:            *bytes.NewBufferString(""),
-		last_token:     t.Token(),
+		last_token:     toke,
 		formatting_buf: *bytes.NewBuffer(make([]byte, 0, 256)),
 	}, nil
 }

@@ -140,6 +140,8 @@ func (fr *format_reader) Read(b []byte) (n int, err error) {
 		}
 
 		fr.buf.Write(fr.formatting_buf.Bytes())
+		fr.formatting_buf.Reset()
+		fr.tokenizer.Next()
 		fr.last_token = fr.tokenizer.Token()
 	}
 }
