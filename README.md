@@ -53,4 +53,4 @@ Fully fledged [documentation](https://pkg.go.dev/github.com/udan-jayanith/GoHTML
 
 ## Contributions
 
-Contributions are welcome and pull requests and issues will be viewed by an official.
+Feel free to contributions.

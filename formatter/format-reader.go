@@ -1,4 +1,4 @@
-package Formatter 
+package Formatter
 
 import (
 	"bytes"
@@ -123,17 +123,18 @@ func (fr *format_reader) Read(b []byte) (n int, err error) {
 			format_attribute_list(tokenize_kv_attr(fr.last_token.Attr), fr.format_options.LineLength, fr)
 			fr.write_string_to_formatting_buf(">")
 
-			if fr.last_token.Type == html.StartTagToken {
+			switch fr.last_token.Type {
+			case html.StartTagToken:
 				fr.increment_indentation()
-			} else if fr.last_token.Type == html.EndTagToken {
+			case html.EndTagToken:
 				fr.decrement_indentation()
 			}
+
 		case html.TextToken:
-			if !fr.format_options.AutoWrapText {
+			if fr.format_options.AutoWrapText {
 				break
 			}
-			// always write text in a new line and end in a new line.
-			panic("Not implemented")
+			fr.wrap_text(fr.last_token.Data)
 		case html.CommentToken:
 			// always put comments on a new line and end in a new line.
 		}
